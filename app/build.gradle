@@ -1,6 +1,9 @@
 plugins {
     id 'com.android.application'
     id 'kotlin-android'
+
+    // Added plugin id
+    id 'org.jetbrains.dokka'
 }
 
 android {
@@ -62,4 +65,13 @@ dependencies {
     androidTestImplementation 'androidx.test.espresso:espresso-core:3.4.0'
     androidTestImplementation "androidx.compose.ui:ui-test-junit4:$compose_version"
     debugImplementation "androidx.compose.ui:ui-tooling:$compose_version"
+}
+
+tasks.dokkaHtml.configure {
+    outputDirectory.set(file("$buildDir/kdoc"))
+    dokkaSourceSets {
+        named("main") {
+            noAndroidSdkLink.set(false)
+        }
+    }
 }
