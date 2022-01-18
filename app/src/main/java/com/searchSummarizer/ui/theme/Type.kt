@@ -15,39 +15,46 @@ val MPLUS1 = FontFamily(
 )
 
 val PoncTypography = Typography(
-    h2 = TextStyle(
+    h1 = TextStyle(
         fontFamily = MPLUS1,
         fontWeight = FontWeight.W400,
         fontSize = 57.sp,
         lineHeight = 64.sp,
         letterSpacing = (-0.25).sp
     ),
-    h3 = TextStyle(
+    h2 = TextStyle(
         fontFamily = MPLUS1,
         fontWeight = FontWeight.W400,
         fontSize = 45.sp,
         lineHeight = 52.sp,
         letterSpacing = 0.sp
     ),
-    h4 = TextStyle(
+    h3 = TextStyle(
         fontFamily = MPLUS1,
         fontWeight = FontWeight.W400,
         fontSize = 36.sp,
         lineHeight = 44.sp,
         letterSpacing = 0.sp
     ),
-    h5 = TextStyle(
+    h4 = TextStyle(
         fontFamily = MPLUS1,
         fontWeight = FontWeight.W400,
         fontSize = 32.sp,
         lineHeight = 40.sp,
         letterSpacing = 0.sp
     ),
-    h6 = TextStyle(
+    h5 = TextStyle(
         fontFamily = MPLUS1,
         fontWeight = FontWeight.W400,
         fontSize = 28.sp,
         lineHeight = 36.sp,
+        letterSpacing = 0.sp
+    ),
+    h6 = TextStyle(
+        fontFamily = MPLUS1,
+        fontWeight = FontWeight.W400,
+        fontSize = 24.sp,
+        lineHeight = 32.sp,
         letterSpacing = 0.sp
     ),
     subtitle1 = TextStyle(
