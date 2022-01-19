@@ -92,6 +92,14 @@ fun StartUpScreenPreview() {
     }
 }
 
+@Preview
+@Composable
+fun StartUpScreenDarkPreview() {
+    SearchSummarizerTheme(useDarkTheme = true) {
+        StartUpScreen()
+    }
+}
+
 @Composable
 fun StartUpCanvas(
     color: Color
