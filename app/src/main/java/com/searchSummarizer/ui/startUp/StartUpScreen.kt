@@ -41,7 +41,7 @@ fun StartUpScreen(
         )
         Column(
             horizontalAlignment = Alignment.CenterHorizontally,
-            modifier = modifier.padding(top = 140.dp)
+            modifier = modifier.padding(top = 190.dp)
         ) {
             Image(
                 painter = painterResource(id = R.drawable.web_search),
@@ -51,19 +51,19 @@ fun StartUpScreen(
                     color = MaterialTheme.colors.primary.copy(alpha = 0.3f)
                 )
             )
-            Spacer(modifier.padding(80.dp))
+            Spacer(modifier.padding(70.dp))
             Text(
                 text = "再検索をスムーズに",
                 style = MaterialTheme.typography.h6.copy(fontWeight = FontWeight.Bold)
             )
-            Spacer(modifier.padding(4.dp))
+            Spacer(modifier.padding(12.dp))
             Text(
                 text =
                 """
                     Search Summarizerは
                     あなたの検索タブをまとめて
                     管理することで再検索を
-                    スムーズに行います
+                    スムーズにします
                 """.trimIndent(),
                 textAlign = TextAlign.Center
             )
@@ -105,26 +105,26 @@ fun StartUpCanvas(
             val width = size.width
             val height = size.height
             val path = Path().apply {
-                moveTo(width.times(.3644f), height.times(.0848f))
+                moveTo(width.times(.3631f), height.times(.2148f))
                 cubicTo(
-                    width.times(.7356f), height.times(.0348f),
-                    width.times(1.0685f), height.times(.3102f),
-                    width.times(1.0685f), height.times(.5759f)
+                    width.times(.7343f), height.times(.1648f),
+                    width.times(1.0672f), height.times(.4402f),
+                    width.times(1.0672f), height.times(.7059f)
                 )
                 cubicTo(
-                    width.times(1.0685f), height.times(.9021f),
-                    width.times(.9011f), height.times(.9657f),
-                    width.times(.5029f), height.times(.9657f)
+                    width.times(1.0672f), height.times(1.0321f),
+                    width.times(.8998f), height.times(1.0957f),
+                    width.times(.5016f), height.times(1.0957f)
                 )
                 cubicTo(
-                    width.times(.119f), height.times(.9446f),
-                    width.times(.0579f), height.times(1.294f),
-                    width.times(-.1549f), height.times(1.1601f)
+                    width.times(.1177f), height.times(1.0746f),
+                    width.times(.0566f), height.times(1.424f),
+                    width.times(-.1562f), height.times(1.2901f)
                 )
                 cubicTo(
-                    width.times(-.3753f), height.times(.9894f),
-                    width.times(-.0727f), height.times(.1438f),
-                    width.times(.3644f), height.times(.0848f)
+                    width.times(-.3766f), height.times(1.1194f),
+                    width.times(-.074f), height.times(.2738f),
+                    width.times(.3631f), height.times(.2148f)
                 )
                 close()
             }

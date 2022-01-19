@@ -3,11 +3,15 @@ package com.searchSummarizer
 import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
+import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.padding
 import androidx.compose.material.MaterialTheme
 import androidx.compose.material.Surface
-import androidx.compose.material.Text
 import androidx.compose.runtime.Composable
-import androidx.compose.ui.tooling.preview.Preview
+import androidx.compose.ui.Modifier
+import androidx.compose.ui.unit.dp
+import androidx.core.view.WindowCompat
+import com.searchSummarizer.ui.startUp.StartUpScreen
 import com.searchSummarizer.ui.theme.SearchSummarizerTheme
 
 class SearchSummarizerActivity : ComponentActivity() {
@@ -15,24 +19,15 @@ class SearchSummarizerActivity : ComponentActivity() {
         super.onCreate(savedInstanceState)
         setContent {
             SearchSummarizerTheme {
-                // A surface container using the 'background' color from the theme
-                Surface(color = MaterialTheme.colors.background) {
-                    Greeting("Android")
-                }
+                WindowCompat.setDecorFitsSystemWindows(window, false)
+                SearchSummarizerApp()
             }
         }
     }
 }
 
 @Composable
-fun Greeting(name: String) {
-    Text(text = "Hello $name!")
+fun SearchSummarizerApp() {
+    StartUpScreen()
 }
 
-@Preview(showBackground = true)
-@Composable
-fun DefaultPreview() {
-    SearchSummarizerTheme {
-        Greeting("Android")
-    }
-}
