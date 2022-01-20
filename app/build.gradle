@@ -72,6 +72,8 @@ dependencies {
 
     // Added dependencies
     ktlint 'com.pinterest:ktlint:0.43.2'
+    implementation "com.google.accompanist:accompanist-systemuicontroller:0.17.0"
+    implementation "com.google.accompanist:accompanist-insets:0.20.2"
 }
 
 tasks.dokkaHtml.configure {
