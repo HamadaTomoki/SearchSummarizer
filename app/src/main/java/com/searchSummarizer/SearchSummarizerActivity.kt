@@ -5,7 +5,7 @@ import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.compose.runtime.Composable
 import androidx.core.view.WindowCompat
-import com.searchSummarizer.ui.startUp.StartUpScreen
+import com.searchSummarizer.ui.browse.BrowseScreen
 import com.searchSummarizer.ui.theme.SearchSummarizerTheme
 
 class SearchSummarizerActivity : ComponentActivity() {
@@ -22,5 +22,5 @@ class SearchSummarizerActivity : ComponentActivity() {
 
 @Composable
 fun SearchSummarizerApp() {
-    StartUpScreen()
+    BrowseScreen()
 }
