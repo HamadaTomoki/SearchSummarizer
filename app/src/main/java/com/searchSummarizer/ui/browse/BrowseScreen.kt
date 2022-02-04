@@ -4,6 +4,10 @@ import android.annotation.SuppressLint
 import android.view.ViewGroup
 import android.webkit.WebView
 import android.webkit.WebViewClient
+import androidx.compose.animation.AnimatedVisibility
+import androidx.compose.animation.ExperimentalAnimationApi
+import androidx.compose.animation.fadeIn
+import androidx.compose.animation.fadeOut
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
@@ -18,6 +22,8 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.lazy.LazyRow
+import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.Icon
 import androidx.compose.material.MaterialTheme
@@ -26,6 +32,7 @@ import androidx.compose.material.Text
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.MoreVert
 import androidx.compose.material.icons.filled.Search
+import androidx.compose.material.icons.filled.ShoppingCart
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -33,6 +40,7 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.drawBehind
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
@@ -40,8 +48,12 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.viewinterop.AndroidView
 import com.searchSummarizer.R
 
+@OptIn(ExperimentalAnimationApi::class)
 @Composable
 fun BrowseScreen(
+    extended: Boolean = true,
+    onTabClick: () -> Unit = {},
+    favIcons: List<ImageVector> = listOf(Icons.Filled.Search, Icons.Filled.ShoppingCart),
     modifier: Modifier = Modifier
 ) {
     Surface(
@@ -50,8 +62,15 @@ fun BrowseScreen(
     ) {
         Column {
             Spacer(modifier.height(48.dp))
-            BrowseTab()
-            BrowseBody(url = "https://medium.com/")
+            BrowseTab(
+                extended = extended,
+                onTabClick = onTabClick,
+                favIcons = favIcons
+            )
+            BrowseBody(
+                url = "https://medium.com/",
+                extended = extended
+            )
         }
     }
 }
@@ -62,8 +81,13 @@ fun BrowseScreenPreview() {
     BrowseScreen()
 }
 
+
+@OptIn(ExperimentalAnimationApi::class)
 @Composable
 fun BrowseTab(
+    extended: Boolean,
+    onTabClick: () -> Unit,
+    favIcons: List<ImageVector>,
     modifier: Modifier = Modifier
 ) {
     Row(
@@ -84,13 +108,15 @@ fun BrowseTab(
             .height(40.dp)
 
     ) {
-        Image(
-            painter = painterResource(id = R.drawable.ic_search_summarizer),
-            contentDescription = null,
-            modifier = modifier
-                .fillMaxHeight()
-                .padding(4.dp)
-        )
+        AnimatedVisibility(visible = extended) {
+            Image(
+                painter = painterResource(id = R.drawable.ic_search_summarizer),
+                contentDescription = null,
+                modifier = modifier
+                    .fillMaxHeight()
+                    .padding(4.dp)
+            )
+        }
         Spacer(modifier.padding(4.dp))
         Surface(
             shape = RoundedCornerShape(25.dp),
@@ -104,12 +130,15 @@ fun BrowseTab(
                     vertical = 8.dp
                 )
             ) {
-                Icon(
-                    imageVector = Icons.Filled.Search,
-                    contentDescription = null,
-                    modifier = modifier
-                        .fillMaxHeight()
-                )
+                LazyRow(modifier.weight(1f)) {
+                    items(favIcons) {
+                        Icon(
+                            imageVector = it,
+                            contentDescription = null,
+                            modifier = modifier.fillMaxHeight()
+                        )
+                    }
+                }
                 Spacer(modifier.weight(1f))
                 Box(
                     modifier = Modifier
@@ -135,7 +164,7 @@ fun BrowseTab(
                     contentAlignment = Alignment.Center
                 ) {
                     Text(
-                        text = "3",
+                        text = favIcons.size.toString(),
                         style = MaterialTheme.typography.body2,
                         fontWeight = FontWeight.Bold,
                     )
@@ -153,8 +182,23 @@ fun BrowseTab(
 }
 
 @SuppressLint("SetJavaScriptEnabled")
+@OptIn(ExperimentalAnimationApi::class)
 @Composable
-fun BrowseBody(url: String) {
+fun BrowseBody(
+    url: String,
+    extended: Boolean,
+    modifier: Modifier = Modifier
+) {
+    AnimatedVisibility(
+        visible = !extended,
+        enter = fadeIn(),
+        exit = fadeOut()
+    ) {
+        Surface(
+            modifier = modifier.fillMaxSize()
+        ) {
+        }
+    }
     AndroidView(factory = {
         WebView(it).apply {
             layoutParams = ViewGroup.LayoutParams(
