@@ -2,10 +2,12 @@ package com.searchSummarizer.ui.components
 
 import androidx.annotation.StringRes
 import androidx.compose.foundation.Image
+import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.BasicTextField
 import androidx.compose.foundation.text.KeyboardActions
 import androidx.compose.foundation.text.KeyboardOptions
@@ -22,6 +24,7 @@ import androidx.compose.ui.focus.FocusDirection
 import androidx.compose.ui.focus.FocusRequester
 import androidx.compose.ui.focus.focusRequester
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.SolidColor
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.platform.LocalFocusManager
 import androidx.compose.ui.platform.LocalSoftwareKeyboardController
@@ -48,6 +51,12 @@ fun BrowseTextField(
         Image(
             painter = painterResource(id = R.drawable.ic_search_summarizer),
             contentDescription = null,
+            modifier = modifier
+                .background(
+                    shape = RoundedCornerShape(50.dp),
+                    color = MaterialTheme.colors.primary.copy(alpha = 0.3f)
+                )
+                .padding(4.dp)
         )
         Spacer(modifier.padding(4.dp))
         Box(
@@ -67,9 +76,11 @@ fun BrowseTextField(
                     keyboardController?.hide()
                 }),
                 textStyle = TextStyle(
-                    color = MaterialTheme.colors.onSurface
+
+                    color = MaterialTheme.colors.onSurface,
                 ),
                 singleLine = true,
+                cursorBrush = SolidColor(MaterialTheme.colors.onSurface),
                 modifier = modifier.focusRequester(requester)
             )
             SideEffect {

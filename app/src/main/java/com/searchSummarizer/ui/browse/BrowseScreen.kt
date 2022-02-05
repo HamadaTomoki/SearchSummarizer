@@ -22,7 +22,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.viewinterop.AndroidView
-import com.searchSummarizer.ui.components.BrowseTab
+import com.searchSummarizer.ui.components.BrowseHeader
 
 @OptIn(ExperimentalAnimationApi::class)
 @Composable
@@ -37,7 +37,7 @@ fun BrowseScreen(
         modifier = modifier.fillMaxSize()
     ) {
         Column(modifier.padding(top = 48.dp)) {
-            BrowseTab(
+            BrowseHeader(
                 extended = extended,
                 onTabClick = onTabClick,
                 favIconUrls = favIconUrls
