@@ -26,9 +26,7 @@ import androidx.compose.material.Text
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.MoreVert
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
-import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -50,7 +48,6 @@ fun BrowseHeader(
     favIconUrls: List<String>,
     modifier: Modifier = Modifier,
 ) {
-    val (keyword, setKeyword) = rememberSaveable { mutableStateOf("") }
     Row(
         modifier = modifier
             .fillMaxWidth()
@@ -70,7 +67,12 @@ fun BrowseHeader(
 
     ) {
         AppIcon(extended, modifier)
-        BrowseTab(modifier.weight(1f), onTabClick, extended, favIconUrls, keyword, setKeyword)
+        BrowseTab(
+            modifier = modifier.weight(1f),
+            onTabClick = onTabClick,
+            extended = extended,
+            favIconUrls = favIconUrls
+        )
         MoreOption(extended, modifier)
     }
 }
@@ -121,8 +123,6 @@ fun BrowseTab(
     onTabClick: () -> Unit,
     extended: Boolean,
     favIconUrls: List<String>,
-    keyword: String,
-    setKeyword: (String) -> Unit
 ) {
     val interactionSource = remember { MutableInteractionSource() }
     Surface(
@@ -143,11 +143,7 @@ fun BrowseTab(
                 BrowseTabContent(favIconUrls)
             }
             AnimatedVisibility(visible = !extended) {
-                BrowseEntry(
-                    keyword = keyword,
-                    onKeywordChange = setKeyword,
-                    onBrowse = { /*TODO*/ }
-                )
+                BrowseTextField()
             }
         }
     }
@@ -206,19 +202,4 @@ private fun BrowseTabContent(
             )
         }
     }
-}
-
-@Composable
-fun BrowseEntry(
-    keyword: String,
-    onKeywordChange: (String) -> Unit,
-    onBrowse: () -> Unit,
-    modifier: Modifier = Modifier
-) {
-    BrowseTextField(
-        modifier = modifier,
-        value = keyword,
-        onValueChange = onKeywordChange,
-        onBrowse = onBrowse
-    )
 }

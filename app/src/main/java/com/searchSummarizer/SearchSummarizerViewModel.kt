@@ -2,6 +2,7 @@ package com.searchSummarizer
 
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.setValue
 import androidx.lifecycle.ViewModel
 import com.searchSummarizer.ui.HttpRoutes
 
@@ -17,7 +18,16 @@ class SearchSummarizerViewModel : ViewModel() {
         "https://driveomjfjdsf/drive/u/0/my-drive",
         "https://github.com/",
     )
+
     val favIconUrls: List<String> = tabUrls.map { url -> HttpRoutes.FAVICON_URL(url) }
 
-    val keyword: String by mutableStateOf("")
+    var extended by mutableStateOf(true)
+
+    var keyword: String by mutableStateOf("")
+
+    var currentUrl: String by mutableStateOf("https://www.google.com")
+
+    fun search() {
+        currentUrl = "https://www.google.com/search?q=$keyword"
+    }
 }

@@ -35,30 +35,33 @@ import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.unit.dp
 import com.searchSummarizer.R
+import com.searchSummarizer.SearchSummarizerViewModel
+import org.koin.androidx.compose.getViewModel
 
 @OptIn(ExperimentalComposeUiApi::class)
 @Composable
 fun BrowseTextField(
-    value: String,
-    onValueChange: (String) -> Unit,
-    onBrowse: () -> Unit,
-    modifier: Modifier
+    vm: SearchSummarizerViewModel = getViewModel()
 ) {
+
+    val value = vm.keyword
+    val onValueChange: (String) -> Unit = { vm.keyword = it }
+
     Row(
-        modifier = modifier,
+        modifier = Modifier,
         verticalAlignment = Alignment.CenterVertically
     ) {
         Image(
             painter = painterResource(id = R.drawable.ic_search_summarizer),
             contentDescription = null,
-            modifier = modifier
+            modifier = Modifier
                 .background(
                     shape = RoundedCornerShape(50.dp),
                     color = MaterialTheme.colors.primary.copy(alpha = 0.3f)
                 )
                 .padding(4.dp)
         )
-        Spacer(modifier.padding(4.dp))
+        Spacer(Modifier.padding(4.dp))
         Box(
             contentAlignment = Alignment.CenterStart
         ) {
@@ -72,16 +75,16 @@ fun BrowseTextField(
                     keyboardType = KeyboardType.Text
                 ),
                 keyboardActions = KeyboardActions(onSearch = {
-                    onBrowse()
+                    if (value.isNotEmpty()) vm.search()
                     keyboardController?.hide()
+                    vm.extended = !vm.extended
                 }),
                 textStyle = TextStyle(
-
                     color = MaterialTheme.colors.onSurface,
                 ),
                 singleLine = true,
                 cursorBrush = SolidColor(MaterialTheme.colors.onSurface),
-                modifier = modifier.focusRequester(requester)
+                modifier = Modifier.focusRequester(requester)
             )
             SideEffect {
                 requester.requestFocus()

@@ -19,11 +19,14 @@ class SearchSummarizerActivity : ComponentActivity() {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-
         // Koin
         GlobalContext.getOrNull() ?: startKoin {
             androidContext(this@SearchSummarizerActivity)
-            modules(listOf(viewModelModule))
+            modules(
+                listOf(
+                    viewModelModule,
+                )
+            )
         }
 
         setContent {
@@ -37,7 +40,8 @@ class SearchSummarizerActivity : ComponentActivity() {
 
 @Composable
 fun SearchSummarizerApp(searchSummarizerViewModel: SearchSummarizerViewModel) {
-    BrowseScreen(
-        favIconUrls = searchSummarizerViewModel.favIconUrls
-    )
+
+    val onBrowse: (String) -> Unit = { url ->
+    }
+    BrowseScreen()
 }

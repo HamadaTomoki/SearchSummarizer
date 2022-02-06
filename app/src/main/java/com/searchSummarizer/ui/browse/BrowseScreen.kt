@@ -3,35 +3,34 @@ package com.searchSummarizer.ui.browse
 import android.annotation.SuppressLint
 import android.view.ViewGroup
 import android.webkit.WebView
-import android.webkit.WebViewClient
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.ExperimentalAnimationApi
 import androidx.compose.animation.fadeIn
 import androidx.compose.animation.fadeOut
+import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material.MaterialTheme
 import androidx.compose.material.Surface
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.saveable.rememberSaveable
-import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.viewinterop.AndroidView
+import androidx.webkit.WebSettingsCompat
+import androidx.webkit.WebViewFeature
+import com.searchSummarizer.SearchSummarizerViewModel
 import com.searchSummarizer.ui.components.BrowseHeader
+import org.koin.androidx.compose.getViewModel
 
 @OptIn(ExperimentalAnimationApi::class)
 @Composable
 fun BrowseScreen(
-    favIconUrls: List<String>,
     modifier: Modifier = Modifier,
+    vm: SearchSummarizerViewModel = getViewModel()
 ) {
-    var extended by rememberSaveable { mutableStateOf(true) }
-    val onTabClick = { if (extended) extended = !extended }
+    val extended = vm.extended
     Surface(
         color = MaterialTheme.colors.primary.copy(alpha = 0.5f),
         modifier = modifier.fillMaxSize()
@@ -39,11 +38,13 @@ fun BrowseScreen(
         Column(modifier.padding(top = 48.dp)) {
             BrowseHeader(
                 extended = extended,
-                onTabClick = onTabClick,
-                favIconUrls = favIconUrls
+                onTabClick = {
+                    vm.keyword = ""
+                    if (extended) vm.extended = !extended
+                },
+                favIconUrls = vm.favIconUrls
             )
             BrowseBody(
-                url = "https://google.com/",
                 extended = extended
             )
         }
@@ -60,9 +61,10 @@ fun BrowseScreenPreview() {
 @OptIn(ExperimentalAnimationApi::class)
 @Composable
 fun BrowseBody(
-    url: String,
     extended: Boolean,
-    modifier: Modifier = Modifier
+    modifier: Modifier = Modifier,
+    useDarkTheme: Boolean = isSystemInDarkTheme(),
+    vm: SearchSummarizerViewModel = getViewModel()
 ) {
     AnimatedVisibility(
         visible = !extended,
@@ -80,11 +82,17 @@ fun BrowseBody(
                 ViewGroup.LayoutParams.MATCH_PARENT,
                 ViewGroup.LayoutParams.MATCH_PARENT
             )
-            webViewClient = WebViewClient()
+            webViewClient = BrowseWebViewClient { url -> vm.currentUrl = url }
+            if (WebViewFeature.isFeatureSupported(WebViewFeature.FORCE_DARK) && useDarkTheme) {
+                WebSettingsCompat.setForceDark(
+                    this.settings,
+                    WebSettingsCompat.FORCE_DARK_ON
+                )
+            }
             settings.javaScriptEnabled = true
-            loadUrl(url)
+            loadUrl(vm.currentUrl)
         }
     }, update = {
-        it.loadUrl(url)
+        it.loadUrl(vm.currentUrl)
     })
 }
