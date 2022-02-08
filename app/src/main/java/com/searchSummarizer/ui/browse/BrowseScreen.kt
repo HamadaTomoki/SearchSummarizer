@@ -1,8 +1,11 @@
 package com.searchSummarizer.ui.browse
 
 import android.annotation.SuppressLint
+import android.graphics.Bitmap
 import android.view.ViewGroup
 import android.webkit.WebView
+import android.webkit.WebViewClient
+import androidx.activity.compose.BackHandler
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.ExperimentalAnimationApi
 import androidx.compose.animation.fadeIn
@@ -14,13 +17,17 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.material.MaterialTheme
 import androidx.compose.material.Surface
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.viewinterop.AndroidView
 import androidx.webkit.WebSettingsCompat
 import androidx.webkit.WebViewFeature
-import com.searchSummarizer.SearchSummarizerViewModel
+import com.searchSummarizer.app.SearchSummarizerViewModel
 import com.searchSummarizer.ui.components.BrowseHeader
 import org.koin.androidx.compose.getViewModel
 
@@ -66,6 +73,8 @@ fun BrowseBody(
     useDarkTheme: Boolean = isSystemInDarkTheme(),
     vm: SearchSummarizerViewModel = getViewModel()
 ) {
+    var backEnabled by remember { mutableStateOf(true) }
+    var webView: WebView? = null
     AnimatedVisibility(
         visible = !extended,
         enter = fadeIn(),
@@ -82,7 +91,13 @@ fun BrowseBody(
                 ViewGroup.LayoutParams.MATCH_PARENT,
                 ViewGroup.LayoutParams.MATCH_PARENT
             )
-            webViewClient = BrowseWebViewClient { url -> vm.currentUrl = url }
+            webViewClient = object : WebViewClient() {
+                override fun onPageStarted(view: WebView?, url: String?, favicon: Bitmap?) {
+                    super.onPageStarted(view, url, favicon)
+                    backEnabled = view?.canGoBack() == true
+                    vm.currentUrl = url.toString()
+                }
+            }
             if (WebViewFeature.isFeatureSupported(WebViewFeature.FORCE_DARK) && useDarkTheme) {
                 WebSettingsCompat.setForceDark(
                     this.settings,
@@ -91,8 +106,17 @@ fun BrowseBody(
             }
             settings.javaScriptEnabled = true
             loadUrl(vm.currentUrl)
+            webView = this
         }
     }, update = {
-        it.loadUrl(vm.currentUrl)
+        webView = it
+        webView?.loadUrl(vm.currentUrl)
     })
+
+    BackHandler(
+        enabled = backEnabled,
+        onBack = {
+            webView?.goBack()
+        }
+    )
 }

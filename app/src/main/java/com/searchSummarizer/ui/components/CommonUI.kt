@@ -32,15 +32,17 @@ import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.input.ImeAction
+import androidx.compose.ui.text.input.KeyboardCapitalization
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.unit.dp
 import com.searchSummarizer.R
-import com.searchSummarizer.SearchSummarizerViewModel
+import com.searchSummarizer.app.SearchSummarizerViewModel
 import org.koin.androidx.compose.getViewModel
 
 @OptIn(ExperimentalComposeUiApi::class)
 @Composable
 fun BrowseTextField(
+    modifier: Modifier = Modifier,
     vm: SearchSummarizerViewModel = getViewModel()
 ) {
 
@@ -48,20 +50,20 @@ fun BrowseTextField(
     val onValueChange: (String) -> Unit = { vm.keyword = it }
 
     Row(
-        modifier = Modifier,
+        modifier = modifier,
         verticalAlignment = Alignment.CenterVertically
     ) {
         Image(
             painter = painterResource(id = R.drawable.ic_search_summarizer),
             contentDescription = null,
-            modifier = Modifier
+            modifier = modifier
                 .background(
                     shape = RoundedCornerShape(50.dp),
                     color = MaterialTheme.colors.primary.copy(alpha = 0.3f)
                 )
                 .padding(4.dp)
         )
-        Spacer(Modifier.padding(4.dp))
+        Spacer(modifier.padding(4.dp))
         Box(
             contentAlignment = Alignment.CenterStart
         ) {
@@ -71,20 +73,24 @@ fun BrowseTextField(
                 value = value,
                 onValueChange = onValueChange,
                 keyboardOptions = KeyboardOptions.Default.copy(
+                    capitalization = KeyboardCapitalization.Sentences,
+                    autoCorrect = true,
                     imeAction = ImeAction.Search,
                     keyboardType = KeyboardType.Text
                 ),
-                keyboardActions = KeyboardActions(onSearch = {
-                    if (value.isNotEmpty()) vm.search()
-                    keyboardController?.hide()
-                    vm.extended = !vm.extended
-                }),
+                keyboardActions = KeyboardActions(
+                    onSearch = {
+                        if (value.isNotEmpty()) vm.search()
+                        vm.extended = !vm.extended
+                        keyboardController?.hide()
+                    }
+                ),
                 textStyle = TextStyle(
                     color = MaterialTheme.colors.onSurface,
                 ),
                 singleLine = true,
                 cursorBrush = SolidColor(MaterialTheme.colors.onSurface),
-                modifier = Modifier.focusRequester(requester)
+                modifier = modifier.focusRequester(requester)
             )
             SideEffect {
                 requester.requestFocus()

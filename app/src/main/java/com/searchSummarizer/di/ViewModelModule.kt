@@ -1,6 +1,6 @@
 package com.searchSummarizer.di
 
-import com.searchSummarizer.SearchSummarizerViewModel
+import com.searchSummarizer.app.SearchSummarizerViewModel
 import org.koin.androidx.viewmodel.dsl.viewModel
 import org.koin.dsl.module
 

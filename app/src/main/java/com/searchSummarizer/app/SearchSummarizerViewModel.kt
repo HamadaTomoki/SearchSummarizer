@@ -1,4 +1,4 @@
-package com.searchSummarizer
+package com.searchSummarizer.app
 
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -26,6 +26,9 @@ class SearchSummarizerViewModel : ViewModel() {
     var keyword: String by mutableStateOf("")
 
     var currentUrl: String by mutableStateOf("https://www.google.com")
+    var urlIndex: Int by mutableStateOf(0)
+
+    var backEnabled by mutableStateOf(false)
 
     fun search() {
         currentUrl = "https://www.google.com/search?q=$keyword"
