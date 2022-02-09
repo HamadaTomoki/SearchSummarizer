@@ -45,9 +45,7 @@ fun BrowseScreen(
                 },
                 favIconUrls = vm.favIconUrls
             )
-            BrowseBody(
-                extended = extended
-            )
+            BrowseBody(extended = extended)
         }
     }
 }
@@ -63,7 +61,6 @@ fun BrowseScreenPreview() {
 @Composable
 fun BrowseBody(
     extended: Boolean,
-    modifier: Modifier = Modifier,
     useDarkTheme: Boolean = isSystemInDarkTheme(),
     vm: SearchSummarizerViewModel = getViewModel()
 ) {
@@ -74,7 +71,7 @@ fun BrowseBody(
         exit = fadeOut()
     ) {
         Surface(
-            modifier = modifier.fillMaxSize()
+            modifier = Modifier.fillMaxSize()
         ) {
         }
     }
