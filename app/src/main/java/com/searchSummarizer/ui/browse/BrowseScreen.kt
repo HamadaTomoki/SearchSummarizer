@@ -1,10 +1,8 @@
 package com.searchSummarizer.ui.browse
 
 import android.annotation.SuppressLint
-import android.graphics.Bitmap
 import android.view.ViewGroup
 import android.webkit.WebView
-import android.webkit.WebViewClient
 import androidx.activity.compose.BackHandler
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.ExperimentalAnimationApi
@@ -17,10 +15,6 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.material.MaterialTheme
 import androidx.compose.material.Surface
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
-import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
@@ -73,7 +67,6 @@ fun BrowseBody(
     useDarkTheme: Boolean = isSystemInDarkTheme(),
     vm: SearchSummarizerViewModel = getViewModel()
 ) {
-    var backEnabled by remember { mutableStateOf(true) }
     var webView: WebView? = null
     AnimatedVisibility(
         visible = !extended,
@@ -91,13 +84,7 @@ fun BrowseBody(
                 ViewGroup.LayoutParams.MATCH_PARENT,
                 ViewGroup.LayoutParams.MATCH_PARENT
             )
-            webViewClient = object : WebViewClient() {
-                override fun onPageStarted(view: WebView?, url: String?, favicon: Bitmap?) {
-                    super.onPageStarted(view, url, favicon)
-                    backEnabled = view?.canGoBack() == true
-                    vm.currentUrl = url.toString()
-                }
-            }
+            webViewClient = BrowseWebViewClient(vm)
             if (WebViewFeature.isFeatureSupported(WebViewFeature.FORCE_DARK) && useDarkTheme) {
                 WebSettingsCompat.setForceDark(
                     this.settings,
@@ -114,7 +101,7 @@ fun BrowseBody(
     })
 
     BackHandler(
-        enabled = backEnabled,
+        enabled = vm.backEnabled,
         onBack = {
             webView?.goBack()
         }

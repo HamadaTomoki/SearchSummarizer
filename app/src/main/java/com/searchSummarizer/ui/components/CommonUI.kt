@@ -6,6 +6,7 @@ import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.BasicTextField
@@ -65,7 +66,7 @@ fun BrowseTextField(
         )
         Spacer(modifier.padding(4.dp))
         Box(
-            contentAlignment = Alignment.CenterStart
+            contentAlignment = Alignment.CenterStart,
         ) {
             val keyboardController = LocalSoftwareKeyboardController.current
             val requester = FocusRequester()
@@ -74,9 +75,8 @@ fun BrowseTextField(
                 onValueChange = onValueChange,
                 keyboardOptions = KeyboardOptions.Default.copy(
                     capitalization = KeyboardCapitalization.Sentences,
-                    autoCorrect = true,
                     imeAction = ImeAction.Search,
-                    keyboardType = KeyboardType.Text
+                    keyboardType = KeyboardType.Uri
                 ),
                 keyboardActions = KeyboardActions(
                     onSearch = {
@@ -90,7 +90,9 @@ fun BrowseTextField(
                 ),
                 singleLine = true,
                 cursorBrush = SolidColor(MaterialTheme.colors.onSurface),
-                modifier = modifier.focusRequester(requester)
+                modifier = modifier
+                    .focusRequester(requester)
+                    .fillMaxWidth()
             )
             SideEffect {
                 requester.requestFocus()

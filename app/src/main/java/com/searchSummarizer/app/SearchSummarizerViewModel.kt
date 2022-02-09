@@ -1,10 +1,11 @@
 package com.searchSummarizer.app
 
+import android.webkit.URLUtil
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
 import androidx.lifecycle.ViewModel
-import com.searchSummarizer.ui.HttpRoutes
+import com.searchSummarizer.data.Urls
 
 class SearchSummarizerViewModel : ViewModel() {
 
@@ -19,7 +20,7 @@ class SearchSummarizerViewModel : ViewModel() {
         "https://github.com/",
     )
 
-    val favIconUrls: List<String> = tabUrls.map { url -> HttpRoutes.FAVICON_URL(url) }
+    val favIconUrls: List<String> = tabUrls.map { url -> Urls.FavIcon(url).url }
 
     var extended by mutableStateOf(true)
 
@@ -31,6 +32,10 @@ class SearchSummarizerViewModel : ViewModel() {
     var backEnabled by mutableStateOf(false)
 
     fun search() {
+        if (URLUtil.isValidUrl(keyword)) {
+            currentUrl = keyword
+            return
+        }
         currentUrl = "https://www.google.com/search?q=$keyword"
     }
 }
