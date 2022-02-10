@@ -1,14 +1,6 @@
 package com.searchSummarizer.ui.browse
 
-import android.annotation.SuppressLint
-import android.view.ViewGroup
-import android.webkit.WebView
-import androidx.activity.compose.BackHandler
-import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.ExperimentalAnimationApi
-import androidx.compose.animation.fadeIn
-import androidx.compose.animation.fadeOut
-import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
@@ -18,25 +10,23 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
-import androidx.compose.ui.viewinterop.AndroidView
-import androidx.webkit.WebSettingsCompat
-import androidx.webkit.WebViewFeature
+import androidx.lifecycle.viewmodel.compose.viewModel
 import com.searchSummarizer.app.SearchSummarizerViewModel
+import com.searchSummarizer.di.viewModelModule
+import com.searchSummarizer.ui.components.BrowseBody
 import com.searchSummarizer.ui.components.BrowseHeader
-import org.koin.androidx.compose.getViewModel
+import com.searchSummarizer.ui.theme.SearchSummarizerTheme
+import dev.burnoo.cokoin.Koin
 
 @OptIn(ExperimentalAnimationApi::class)
 @Composable
-fun BrowseScreen(
-    modifier: Modifier = Modifier,
-    vm: SearchSummarizerViewModel = getViewModel()
-) {
+fun BrowseScreen(vm: SearchSummarizerViewModel = viewModel()) {
     val extended = vm.extended
     Surface(
         color = MaterialTheme.colors.primary.copy(alpha = 0.5f),
-        modifier = modifier.fillMaxSize()
+        modifier = Modifier.fillMaxSize()
     ) {
-        Column(modifier.padding(top = 48.dp)) {
+        Column(Modifier.padding(top = 48.dp)) {
             BrowseHeader(
                 extended = extended,
                 onTabClick = {
@@ -45,7 +35,7 @@ fun BrowseScreen(
                 },
                 favIconUrls = vm.favIconUrls
             )
-            BrowseBody(extended = extended)
+            BrowseBody()
         }
     }
 }
@@ -53,54 +43,9 @@ fun BrowseScreen(
 @Preview
 @Composable
 fun BrowseScreenPreview() {
-    // BrowseScreen()
-}
-
-@SuppressLint("SetJavaScriptEnabled")
-@OptIn(ExperimentalAnimationApi::class)
-@Composable
-fun BrowseBody(
-    extended: Boolean,
-    useDarkTheme: Boolean = isSystemInDarkTheme(),
-    vm: SearchSummarizerViewModel = getViewModel()
-) {
-    var webView: WebView? = null
-    AnimatedVisibility(
-        visible = !extended,
-        enter = fadeIn(),
-        exit = fadeOut()
-    ) {
-        Surface(
-            modifier = Modifier.fillMaxSize()
-        ) {
+    Koin(appDeclaration = { modules(viewModelModule) }) {
+        SearchSummarizerTheme {
+            BrowseScreen()
         }
     }
-    AndroidView(factory = {
-        WebView(it).apply {
-            layoutParams = ViewGroup.LayoutParams(
-                ViewGroup.LayoutParams.MATCH_PARENT,
-                ViewGroup.LayoutParams.MATCH_PARENT
-            )
-            webViewClient = BrowseWebViewClient(vm)
-            if (WebViewFeature.isFeatureSupported(WebViewFeature.FORCE_DARK) && useDarkTheme) {
-                WebSettingsCompat.setForceDark(
-                    this.settings,
-                    WebSettingsCompat.FORCE_DARK_ON
-                )
-            }
-            settings.javaScriptEnabled = true
-            loadUrl(vm.currentUrl)
-            webView = this
-        }
-    }, update = {
-        webView = it
-        webView?.loadUrl(vm.currentUrl)
-    })
-
-    BackHandler(
-        enabled = vm.backEnabled,
-        onBack = {
-            webView?.goBack()
-        }
-    )
 }

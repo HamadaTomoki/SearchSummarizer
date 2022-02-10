@@ -13,26 +13,18 @@ import com.searchSummarizer.di.searchSummarizerAppModule
 import com.searchSummarizer.di.viewModelModule
 import com.searchSummarizer.ui.browse.BrowseScreen
 import com.searchSummarizer.ui.theme.SearchSummarizerTheme
-import org.koin.android.ext.koin.androidContext
-import org.koin.core.context.GlobalContext
-import org.koin.core.context.startKoin
+import dev.burnoo.cokoin.Koin
 
 class SearchSummarizerActivity : ComponentActivity() {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        // Koin
-        GlobalContext.getOrNull() ?: startKoin {
-            androidContext(this@SearchSummarizerActivity)
-            modules(
-                listOf(viewModelModule, searchSummarizerAppModule)
-            )
-        }
-
         setContent {
-            SearchSummarizerTheme {
-                WindowCompat.setDecorFitsSystemWindows(window, false)
-                SearchSummarizerApp()
+            Koin(appDeclaration = { modules(listOf(viewModelModule, searchSummarizerAppModule)) }) {
+                SearchSummarizerTheme {
+                    WindowCompat.setDecorFitsSystemWindows(window, false)
+                    SearchSummarizerApp()
+                }
             }
         }
     }

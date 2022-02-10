@@ -20,13 +20,14 @@ class SearchSummarizerViewModel : ViewModel() {
         "https://github.com/",
     )
 
-    val favIconUrls: List<String> = tabUrls.map { url -> Urls.FavIcon(url).url }
+    val favIconUrls: List<String> = tabUrls.map { url -> Urls.GoogleFavicon(url).url }
 
     var extended by mutableStateOf(true)
 
     var keyword: String by mutableStateOf("")
 
     var currentUrl: String by mutableStateOf("https://www.google.com")
+    var currentTitle: String by mutableStateOf("")
     var urlIndex: Int by mutableStateOf(0)
 
     var backEnabled by mutableStateOf(false)

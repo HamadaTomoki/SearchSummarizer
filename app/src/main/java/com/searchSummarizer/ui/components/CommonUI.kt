@@ -4,12 +4,9 @@ import androidx.annotation.StringRes
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Box
-import androidx.compose.foundation.layout.IntrinsicSize
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
-import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.BasicTextField
 import androidx.compose.foundation.text.KeyboardActions
@@ -29,32 +26,28 @@ import androidx.compose.ui.focus.focusRequester
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.SolidColor
 import androidx.compose.ui.graphics.vector.ImageVector
-import androidx.compose.ui.layout.layout
 import androidx.compose.ui.platform.LocalFocusManager
 import androidx.compose.ui.platform.LocalSoftwareKeyboardController
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
-import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.input.ImeAction
-import androidx.compose.ui.text.input.KeyboardCapitalization
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.unit.dp
-import androidx.compose.ui.unit.sp
+import androidx.lifecycle.viewmodel.compose.viewModel
 import com.searchSummarizer.R
 import com.searchSummarizer.app.SearchSummarizerViewModel
-import org.koin.androidx.compose.getViewModel
 
 @OptIn(ExperimentalComposeUiApi::class)
 @Composable
 fun BrowseTextField(
     modifier: Modifier = Modifier,
-    vm: SearchSummarizerViewModel = getViewModel()
+    vm: SearchSummarizerViewModel = viewModel()
 ) {
 
     val value = vm.keyword
     val onValueChange: (String) -> Unit = { vm.keyword = it }
 
-    Row(verticalAlignment = Alignment.CenterVertically) {
+    Row {
         Image(
             painter = painterResource(id = R.drawable.ic_search_summarizer),
             contentDescription = null,
@@ -66,14 +59,13 @@ fun BrowseTextField(
                 .padding(4.dp)
         )
         Spacer(modifier.padding(4.dp))
-        Box(modifier = modifier.width(IntrinsicSize.Max)) {
+        Box(contentAlignment = Alignment.CenterStart) {
             val keyboardController = LocalSoftwareKeyboardController.current
             val requester = FocusRequester()
             BasicTextField(
                 value = value,
                 onValueChange = onValueChange,
                 keyboardOptions = KeyboardOptions.Default.copy(
-                    capitalization = KeyboardCapitalization.Sentences,
                     imeAction = ImeAction.Search,
                     keyboardType = KeyboardType.Uri
                 ),
@@ -84,14 +76,10 @@ fun BrowseTextField(
                         keyboardController?.hide()
                     }
                 ),
-                textStyle = TextStyle(
-                    color = MaterialTheme.colors.onSurface,
-                ),
+                textStyle = MaterialTheme.typography.body1.copy(color = MaterialTheme.colors.onSurface),
                 singleLine = true,
                 cursorBrush = SolidColor(MaterialTheme.colors.onSurface),
-                modifier = modifier
-                    .fillMaxWidth()
-                    .focusRequester(requester)
+                modifier = modifier.focusRequester(requester)
             )
             SideEffect {
                 requester.requestFocus()
@@ -100,7 +88,7 @@ fun BrowseTextField(
                 Text(
                     text = "検索語句またはウェブアドレスを入力",
                     color = Color.Gray,
-                    fontSize = 13.sp
+                    fontSize = MaterialTheme.typography.body1.fontSize
                 )
             }
         }
