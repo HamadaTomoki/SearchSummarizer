@@ -1,9 +1,16 @@
 package com.searchSummarizer.ui.components
 
 import android.annotation.SuppressLint
+import android.graphics.Bitmap
+import android.os.Build
+import android.util.Log
 import android.view.ViewGroup
+import android.webkit.WebResourceError
+import android.webkit.WebResourceRequest
 import android.webkit.WebView
+import android.webkit.WebViewClient
 import androidx.activity.compose.BackHandler
+import androidx.annotation.RequiresApi
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.ExperimentalAnimationApi
 import androidx.compose.animation.fadeIn
@@ -36,7 +43,10 @@ import androidx.compose.material.icons.filled.MoreVert
 import androidx.compose.material.icons.filled.Share
 import androidx.compose.material.icons.filled.Tab
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.drawBehind
@@ -54,7 +64,7 @@ import coil.transform.CircleCropTransformation
 import com.searchSummarizer.R
 import com.searchSummarizer.app.SearchSummarizerViewModel
 import com.searchSummarizer.data.Urls
-import com.searchSummarizer.ui.browse.BrowseWebViewClient
+import dev.burnoo.cokoin.get
 
 /** Header -------------------------------------------------- */
 @OptIn(ExperimentalAnimationApi::class)
@@ -197,30 +207,42 @@ private fun BrowseTabContent(
 }
 
 /** Body -------------------------------------------------- */
+@OptIn(ExperimentalAnimationApi::class, androidx.compose.ui.ExperimentalComposeUiApi::class)
+@Composable
+fun BrowseBody(vm: SearchSummarizerViewModel = viewModel()) {
+    Box {
+        if (vm.extended) BrowseWebView(vm, Modifier.fillMaxSize())
+        SearchedTab(vm.extended, vm)
+    }
+}
+
 @OptIn(ExperimentalAnimationApi::class)
 @Composable
-fun BrowseBody(
-    vm: SearchSummarizerViewModel = viewModel()
+private fun SearchedTab(
+    extended: Boolean,
+    vm: SearchSummarizerViewModel,
 ) {
-    val extended = vm.extended
-    Box {
-        BrowseWebView(vm, Modifier.fillMaxSize())
-        AnimatedVisibility(
-            visible = !extended,
-            enter = fadeIn(),
-            exit = fadeOut()
+    AnimatedVisibility(
+        visible = !extended,
+        enter = fadeIn(),
+        exit = fadeOut()
+    ) {
+        Surface(
+            Modifier.fillMaxSize()
         ) {
-            Surface(
-                Modifier.fillMaxSize()
-            ) {
-                Column {
-                    CurrentTab(
-                        title = vm.currentTitle,
-                        url = vm.currentUrl
-                    )
-                }
+            Column {
+                CurrentTab(
+                    title = vm.currentTitle,
+                    url = vm.currentUrl
+                )
             }
         }
+        BackHandler(
+            enabled = true,
+            onBack = {
+                vm.extended = !vm.extended
+            }
+        )
     }
 }
 
@@ -231,14 +253,35 @@ private fun BrowseWebView(
     modifier: Modifier = Modifier,
     useDarkTheme: Boolean = isSystemInDarkTheme()
 ) {
-    var webView: WebView? = null
+    var backEnabled by remember { mutableStateOf(false) }
     AndroidView(factory = {
-        WebView(it).apply {
+        vm.browseWebView.value?.apply {
             layoutParams = ViewGroup.LayoutParams(
                 ViewGroup.LayoutParams.MATCH_PARENT,
                 ViewGroup.LayoutParams.MATCH_PARENT
             )
-            webViewClient = BrowseWebViewClient(vm)
+            webViewClient = object : WebViewClient() {
+                override fun onPageStarted(view: WebView?, url: String?, favicon: Bitmap?) {
+                    super.onPageStarted(view, url, favicon)
+                    vm.currentUrl = url.toString()
+                    vm.currentTitle = view?.title.toString()
+                    backEnabled = view?.canGoBack() == true
+                    Log.i("myweb", "vm.url -> ${vm.currentTitle}")
+                }
+
+
+                @RequiresApi(Build.VERSION_CODES.M)
+                override fun onReceivedError(
+                    view: WebView?,
+                    request: WebResourceRequest?,
+                    error: WebResourceError?
+                ) {
+                    super.onReceivedError(view, request, error)
+                    if (error?.errorCode == ERROR_HOST_LOOKUP) {
+                        view?.loadUrl("about:blank")
+                    }
+                }
+            }
             if (WebViewFeature.isFeatureSupported(WebViewFeature.FORCE_DARK) && useDarkTheme) {
                 WebSettingsCompat.setForceDark(
                     this.settings,
@@ -247,21 +290,13 @@ private fun BrowseWebView(
             }
             settings.javaScriptEnabled = true
             loadUrl(vm.currentUrl)
-            webView = this
-        }
+        }!!
     }, update = {
-        webView = it
-        if (vm.extended) {
-            webView?.loadUrl(vm.currentUrl)
-            vm.currentTitle = webView?.title ?: ""
-        }
     }, modifier = modifier)
 
     BackHandler(
-        enabled = vm.backEnabled,
-        onBack = {
-            webView?.goBack()
-        }
+        enabled = backEnabled,
+        onBack = { vm.browseWebView.value?.goBack() }
     )
 }
 
@@ -335,3 +370,5 @@ private fun Favicon(
         modifier = modifier
     )
 }
+
+

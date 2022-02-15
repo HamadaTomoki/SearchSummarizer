@@ -71,8 +71,7 @@ fun BrowseTextField(
                 ),
                 keyboardActions = KeyboardActions(
                     onSearch = {
-                        if (value.isNotEmpty()) vm.search()
-                        vm.extended = !vm.extended
+                        vm.onSearch()
                         keyboardController?.hide()
                     }
                 ),

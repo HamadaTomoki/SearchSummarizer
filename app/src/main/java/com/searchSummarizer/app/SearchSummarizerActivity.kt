@@ -14,6 +14,7 @@ import com.searchSummarizer.di.viewModelModule
 import com.searchSummarizer.ui.browse.BrowseScreen
 import com.searchSummarizer.ui.theme.SearchSummarizerTheme
 import dev.burnoo.cokoin.Koin
+import dev.burnoo.cokoin.navigation.KoinNavHost
 
 class SearchSummarizerActivity : ComponentActivity() {
 
@@ -33,7 +34,7 @@ class SearchSummarizerActivity : ComponentActivity() {
 @Composable
 fun SearchSummarizerApp() {
     val navController = rememberNavController()
-    NavHost(navController, startDestination = Screen.Browse.route) {
+    KoinNavHost(navController, startDestination = Screen.Browse.route) {
         addBrowseGraph()
     }
 }

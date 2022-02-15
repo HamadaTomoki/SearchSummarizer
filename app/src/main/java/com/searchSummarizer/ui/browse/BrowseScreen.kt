@@ -21,18 +21,14 @@ import dev.burnoo.cokoin.Koin
 @OptIn(ExperimentalAnimationApi::class)
 @Composable
 fun BrowseScreen(vm: SearchSummarizerViewModel = viewModel()) {
-    val extended = vm.extended
     Surface(
         color = MaterialTheme.colors.primary.copy(alpha = 0.5f),
         modifier = Modifier.fillMaxSize()
     ) {
         Column(Modifier.padding(top = 48.dp)) {
             BrowseHeader(
-                extended = extended,
-                onTabClick = {
-                    vm.keyword = ""
-                    if (extended) vm.extended = !extended
-                },
+                extended = vm.extended,
+                onTabClick = vm::onTabClick,
                 favIconUrls = vm.favIconUrls
             )
             BrowseBody()
