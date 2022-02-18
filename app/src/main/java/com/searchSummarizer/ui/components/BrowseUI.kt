@@ -1,16 +1,9 @@
 package com.searchSummarizer.ui.components
 
 import android.annotation.SuppressLint
-import android.graphics.Bitmap
-import android.os.Build
-import android.util.Log
 import android.view.ViewGroup
-import android.webkit.WebResourceError
-import android.webkit.WebResourceRequest
 import android.webkit.WebView
-import android.webkit.WebViewClient
 import androidx.activity.compose.BackHandler
-import androidx.annotation.RequiresApi
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.ExperimentalAnimationApi
 import androidx.compose.animation.fadeIn
@@ -43,10 +36,7 @@ import androidx.compose.material.icons.filled.MoreVert
 import androidx.compose.material.icons.filled.Share
 import androidx.compose.material.icons.filled.Tab
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
-import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.drawBehind
@@ -64,7 +54,7 @@ import coil.transform.CircleCropTransformation
 import com.searchSummarizer.R
 import com.searchSummarizer.app.SearchSummarizerViewModel
 import com.searchSummarizer.data.Urls
-import dev.burnoo.cokoin.get
+import com.searchSummarizer.ui.browse.BrowseWebViewClient
 
 /** Header -------------------------------------------------- */
 @OptIn(ExperimentalAnimationApi::class)
@@ -253,49 +243,30 @@ private fun BrowseWebView(
     modifier: Modifier = Modifier,
     useDarkTheme: Boolean = isSystemInDarkTheme()
 ) {
-    var backEnabled by remember { mutableStateOf(false) }
     AndroidView(factory = {
         vm.browseWebView.value?.apply {
             layoutParams = ViewGroup.LayoutParams(
                 ViewGroup.LayoutParams.MATCH_PARENT,
                 ViewGroup.LayoutParams.MATCH_PARENT
             )
-            webViewClient = object : WebViewClient() {
-                override fun onPageStarted(view: WebView?, url: String?, favicon: Bitmap?) {
-                    super.onPageStarted(view, url, favicon)
-                    vm.currentUrl = url.toString()
-                    vm.currentTitle = view?.title.toString()
-                    backEnabled = view?.canGoBack() == true
-                    Log.i("myweb", "vm.url -> ${vm.currentTitle}")
-                }
-
-
-                @RequiresApi(Build.VERSION_CODES.M)
-                override fun onReceivedError(
-                    view: WebView?,
-                    request: WebResourceRequest?,
-                    error: WebResourceError?
-                ) {
-                    super.onReceivedError(view, request, error)
-                    if (error?.errorCode == ERROR_HOST_LOOKUP) {
-                        view?.loadUrl("about:blank")
-                    }
-                }
-            }
-            if (WebViewFeature.isFeatureSupported(WebViewFeature.FORCE_DARK) && useDarkTheme) {
+            webViewClient = BrowseWebViewClient(vm = vm)
+            if (WebViewFeature.isFeatureSupported(WebViewFeature.FORCE_DARK)) {
                 WebSettingsCompat.setForceDark(
                     this.settings,
-                    WebSettingsCompat.FORCE_DARK_ON
+                    if (useDarkTheme) WebSettingsCompat.FORCE_DARK_ON
+                    else WebSettingsCompat.FORCE_DARK_OFF
                 )
             }
+            scrollBarStyle = WebView.SCROLLBARS_INSIDE_OVERLAY
             settings.javaScriptEnabled = true
+            settings.builtInZoomControls = true
             loadUrl(vm.currentUrl)
         }!!
     }, update = {
     }, modifier = modifier)
 
     BackHandler(
-        enabled = backEnabled,
+        enabled = vm.backEnabled,
         onBack = { vm.browseWebView.value?.goBack() }
     )
 }
@@ -370,5 +341,3 @@ private fun Favicon(
         modifier = modifier
     )
 }
-
-

@@ -9,11 +9,14 @@ import android.webkit.WebViewClient
 import androidx.annotation.RequiresApi
 import com.searchSummarizer.app.SearchSummarizerViewModel
 
-class BrowseWebViewClient(val vm: SearchSummarizerViewModel) : WebViewClient() {
+class BrowseWebViewClient(
+    val vm: SearchSummarizerViewModel
+) : WebViewClient() {
     override fun onPageStarted(view: WebView?, url: String?, favicon: Bitmap?) {
         super.onPageStarted(view, url, favicon)
-        vm.backEnabled = view?.canGoBack() == true
         vm.currentUrl = url.toString()
+        vm.currentTitle = view?.title.toString()
+        vm.backEnabled = view?.canGoBack() == true
     }
 
     @RequiresApi(Build.VERSION_CODES.M)
