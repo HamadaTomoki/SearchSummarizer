@@ -26,12 +26,8 @@ fun BrowseScreen(vm: SearchSummarizerViewModel = viewModel()) {
         modifier = Modifier.fillMaxSize()
     ) {
         Column(Modifier.padding(top = 48.dp)) {
-            BrowseHeader(
-                extended = vm.extended,
-                onTabClick = vm::onTabClick,
-                favIconUrls = vm.favIconUrls
-            )
-            BrowseBody()
+            BrowseHeader()
+            BrowseBody(vm.extended)
         }
     }
 }

@@ -7,54 +7,48 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
 import androidx.lifecycle.AndroidViewModel
-import androidx.lifecycle.viewModelScope
-import com.searchSummarizer.data.Urls
-import kotlinx.coroutines.flow.MutableStateFlow
-import kotlinx.coroutines.flow.StateFlow
-import kotlinx.coroutines.launch
+import com.searchSummarizer.data.SiteInfo
 
 class SearchSummarizerViewModel(application: Application) : AndroidViewModel(application) {
 
     private val context get() = getApplication<Application>().applicationContext
 
-    private val _browseWebView = MutableStateFlow<WebView?>(null)
-    var browseWebView: StateFlow<WebView?> = _browseWebView
-    init {
-        viewModelScope.launch {
-            _browseWebView.value = WebView(context)
-        }
-    }
+    var browseWebView by mutableStateOf(WebView(context))
 
-    private var tabUrls: List<String> = mutableListOf(
-        "https://google.com",
-        "https://stackoverflow.com",
-        "https://qiita.com/",
-        "https://medium.com/",
-        "https://youtube.com/",
-        "https://developer.android.com/",
-        "https://driveomjfjdsf/drive/u/0/my-drive",
-        "https://github.com/",
-    )
-
-    val favIconUrls: List<String> = tabUrls.map { url -> Urls.GoogleFavicon(url).url }
+    var siteInfoList: MutableList<SiteInfo> =
+        mutableListOf(SiteInfo("https://google.com", "Google", false, null))
 
     var extended by mutableStateOf(true)
 
     var keyword: String by mutableStateOf("")
 
-    var currentUrl: String by mutableStateOf("https://www.google.com")
-    var currentTitle: String by mutableStateOf("")
-    var urlIndex: Int by mutableStateOf(0)
-
-    var backEnabled by mutableStateOf(false)
+    var currentTabIndex by mutableStateOf(0)
 
     fun onSearch() {
         extended = !extended
-        currentUrl = when {
+        siteInfoList[currentTabIndex].url = when {
             keyword == "" -> return // empty
             URLUtil.isValidUrl(keyword) -> keyword // valid url
             else -> "https://www.google.com/search?q=$keyword" // keyword
         }
+    }
+
+    fun onSwitchTab(tabIndex: Int) {
+        currentTabIndex = tabIndex
+        extended = !extended
+    }
+
+    fun onAddTab() {
+        siteInfoList.add(
+            SiteInfo(
+                "https://google.com",
+                "Google",
+                false,
+                null
+            )
+        )
+        currentTabIndex = siteInfoList.size - 1
+        extended = !extended
     }
 
     fun onTabClick() {

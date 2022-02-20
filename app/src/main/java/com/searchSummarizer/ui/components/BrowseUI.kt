@@ -9,6 +9,7 @@ import androidx.compose.animation.ExperimentalAnimationApi
 import androidx.compose.animation.fadeIn
 import androidx.compose.animation.fadeOut
 import androidx.compose.foundation.Image
+import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.isSystemInDarkTheme
@@ -21,28 +22,44 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.lazy.itemsIndexed
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.foundation.text.BasicTextField
+import androidx.compose.foundation.text.KeyboardActions
+import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material.Divider
 import androidx.compose.material.Icon
+import androidx.compose.material.IconButton
 import androidx.compose.material.MaterialTheme
 import androidx.compose.material.Surface
 import androidx.compose.material.Text
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.ContentCopy
 import androidx.compose.material.icons.filled.Edit
 import androidx.compose.material.icons.filled.MoreVert
 import androidx.compose.material.icons.filled.Share
 import androidx.compose.material.icons.filled.Tab
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.SideEffect
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
+import androidx.compose.ui.ExperimentalComposeUiApi
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.drawBehind
+import androidx.compose.ui.focus.FocusRequester
+import androidx.compose.ui.focus.focusRequester
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.SolidColor
+import androidx.compose.ui.platform.LocalSoftwareKeyboardController
 import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.text.input.ImeAction
+import androidx.compose.ui.text.input.KeyboardType
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.viewinterop.AndroidView
@@ -53,17 +70,16 @@ import coil.compose.rememberImagePainter
 import coil.transform.CircleCropTransformation
 import com.searchSummarizer.R
 import com.searchSummarizer.app.SearchSummarizerViewModel
+import com.searchSummarizer.data.SiteInfo
 import com.searchSummarizer.data.Urls
 import com.searchSummarizer.ui.browse.BrowseWebViewClient
 
 /** Header -------------------------------------------------- */
 @OptIn(ExperimentalAnimationApi::class)
 @Composable
-fun BrowseHeader(
-    extended: Boolean,
-    onTabClick: () -> Unit,
-    favIconUrls: List<String>,
-) {
+fun BrowseHeader(vm: SearchSummarizerViewModel = viewModel()) {
+    val favIconUrls = vm.siteInfoList.map { Urls.GoogleFavicon(it.url).url }
+    val extended = vm.extended
     Row(
         modifier = Modifier
             .fillMaxWidth()
@@ -85,9 +101,9 @@ fun BrowseHeader(
     ) {
         AppIcon(extended)
         Spacer(Modifier.padding(2.dp))
-        BrowseTab(
+        SearchTab(
             modifier = Modifier.weight(1f),
-            onTabClick = onTabClick,
+            onSearchTabClick = vm::onTabClick,
             extended = extended,
             favIconUrls = favIconUrls
         )
@@ -150,9 +166,9 @@ private fun MoreOptionIcon() {
 
 @ExperimentalAnimationApi
 @Composable
-private fun BrowseTab(
+private fun SearchTab(
     modifier: Modifier,
-    onTabClick: () -> Unit,
+    onSearchTabClick: () -> Unit,
     extended: Boolean,
     favIconUrls: List<String>,
 ) {
@@ -163,7 +179,7 @@ private fun BrowseTab(
             .clickable(
                 interactionSource = interactionSource,
                 indication = null
-            ) { onTabClick() }
+            ) { onSearchTabClick() }
     ) {
         Row(
             modifier = modifier.padding(
@@ -172,17 +188,17 @@ private fun BrowseTab(
             )
         ) {
             AnimatedVisibility(visible = extended) {
-                BrowseTabContent(favIconUrls, modifier.weight(1f))
+                SearchTabContent(favIconUrls, modifier.weight(1f))
             }
             AnimatedVisibility(visible = !extended) {
-                BrowseTextField()
+                SearchTextField()
             }
         }
     }
 }
 
 @Composable
-private fun BrowseTabContent(
+private fun SearchTabContent(
     favIconUrls: List<String>,
     modifier: Modifier = Modifier,
 ) {
@@ -196,24 +212,116 @@ private fun BrowseTabContent(
     }
 }
 
-/** Body -------------------------------------------------- */
-@OptIn(ExperimentalAnimationApi::class, androidx.compose.ui.ExperimentalComposeUiApi::class)
+@OptIn(ExperimentalComposeUiApi::class)
 @Composable
-fun BrowseBody(vm: SearchSummarizerViewModel = viewModel()) {
-    Box {
-        if (vm.extended) BrowseWebView(vm, Modifier.fillMaxSize())
-        SearchedTab(vm.extended, vm)
+fun SearchTextField(
+    modifier: Modifier = Modifier,
+    vm: SearchSummarizerViewModel = viewModel()
+) {
+
+    val value = vm.keyword
+    val onValueChange: (String) -> Unit = { vm.keyword = it }
+
+    Row {
+        Image(
+            painter = painterResource(id = R.drawable.ic_search_summarizer),
+            contentDescription = null,
+            modifier = modifier
+                .background(
+                    shape = RoundedCornerShape(50.dp),
+                    color = MaterialTheme.colors.primary.copy(alpha = 0.3f)
+                )
+                .padding(4.dp)
+        )
+        Spacer(modifier.padding(4.dp))
+        Box(contentAlignment = Alignment.CenterStart) {
+            val keyboardController = LocalSoftwareKeyboardController.current
+            val requester = FocusRequester()
+            BasicTextField(
+                value = value,
+                onValueChange = onValueChange,
+                keyboardOptions = KeyboardOptions.Default.copy(
+                    imeAction = ImeAction.Search,
+                    keyboardType = KeyboardType.Uri
+                ),
+                keyboardActions = KeyboardActions(
+                    onSearch = {
+                        vm.onSearch()
+                        keyboardController?.hide()
+                    }
+                ),
+                textStyle = MaterialTheme.typography.body1.copy(color = MaterialTheme.colors.onSurface),
+                singleLine = true,
+                cursorBrush = SolidColor(MaterialTheme.colors.onSurface),
+                modifier = modifier.focusRequester(requester)
+            )
+            SideEffect {
+                requester.requestFocus()
+            }
+            if (value.isEmpty()) {
+                Text(
+                    text = "検索語句またはウェブアドレスを入力",
+                    color = Color.Gray,
+                    fontSize = MaterialTheme.typography.body1.fontSize
+                )
+            }
+        }
     }
+}
+
+/** Body -------------------------------------------------- */
+@OptIn(ExperimentalAnimationApi::class, ExperimentalComposeUiApi::class)
+@Composable
+fun BrowseBody(extended: Boolean) {
+    Box {
+        if (extended) BrowseWebView(Modifier.fillMaxSize())
+        ExpandedView()
+    }
+}
+
+/** Body main components -------------------------------------------------- */
+@SuppressLint("SetJavaScriptEnabled")
+@Composable
+private fun BrowseWebView(
+    modifier: Modifier = Modifier,
+    vm: SearchSummarizerViewModel = viewModel(),
+    useDarkTheme: Boolean = isSystemInDarkTheme(),
+) {
+    val siteInfo = vm.siteInfoList[vm.currentTabIndex]
+    AndroidView(factory = {
+        vm.browseWebView.also {
+            it.layoutParams = ViewGroup.LayoutParams(
+                ViewGroup.LayoutParams.MATCH_PARENT,
+                ViewGroup.LayoutParams.MATCH_PARENT
+            )
+            it.webViewClient = BrowseWebViewClient(vm = vm)
+            if (WebViewFeature.isFeatureSupported(WebViewFeature.FORCE_DARK)) {
+                WebSettingsCompat.setForceDark(
+                    it.settings,
+                    if (useDarkTheme) WebSettingsCompat.FORCE_DARK_ON
+                    else WebSettingsCompat.FORCE_DARK_OFF
+                )
+            }
+            it.scrollBarStyle = WebView.SCROLLBARS_INSIDE_OVERLAY
+            it.settings.javaScriptEnabled = true
+            it.settings.builtInZoomControls = true
+            it.loadUrl(siteInfo.url)
+        }
+    }, update = {
+    }, modifier = modifier)
+
+    BackHandler(
+        enabled = siteInfo.backEnabled,
+        onBack = { vm.browseWebView.goBack() }
+    )
 }
 
 @OptIn(ExperimentalAnimationApi::class)
 @Composable
-private fun SearchedTab(
-    extended: Boolean,
-    vm: SearchSummarizerViewModel,
-) {
+private fun ExpandedView(vm: SearchSummarizerViewModel = viewModel()) {
+    val siteInfo = vm.siteInfoList[vm.currentTabIndex]
     AnimatedVisibility(
-        visible = !extended,
+        visible = !vm.extended,
         enter = fadeIn(),
         exit = fadeOut()
     ) {
@@ -222,9 +330,21 @@ private fun SearchedTab(
         ) {
             Column {
                 CurrentTab(
-                    title = vm.currentTitle,
-                    url = vm.currentUrl
+                    title = siteInfo.title,
+                    url = siteInfo.url
                 )
+                Divider()
+                Row(
+                    modifier = Modifier.padding(vertical = 12.dp, horizontal = 16.dp),
+                ) {
+                    UrlTabRow(
+                        modifier = Modifier.weight(1f),
+                        onTabClick = vm::onSwitchTab,
+                        siteInfoList = vm.siteInfoList
+                    )
+                    Spacer(Modifier.padding(4.dp))
+                    TabPlusIcon(vm::onAddTab)
+                }
             }
         }
         BackHandler(
@@ -236,41 +356,7 @@ private fun SearchedTab(
     }
 }
 
-@SuppressLint("SetJavaScriptEnabled")
-@Composable
-private fun BrowseWebView(
-    vm: SearchSummarizerViewModel,
-    modifier: Modifier = Modifier,
-    useDarkTheme: Boolean = isSystemInDarkTheme()
-) {
-    AndroidView(factory = {
-        vm.browseWebView.value?.apply {
-            layoutParams = ViewGroup.LayoutParams(
-                ViewGroup.LayoutParams.MATCH_PARENT,
-                ViewGroup.LayoutParams.MATCH_PARENT
-            )
-            webViewClient = BrowseWebViewClient(vm = vm)
-            if (WebViewFeature.isFeatureSupported(WebViewFeature.FORCE_DARK)) {
-                WebSettingsCompat.setForceDark(
-                    this.settings,
-                    if (useDarkTheme) WebSettingsCompat.FORCE_DARK_ON
-                    else WebSettingsCompat.FORCE_DARK_OFF
-                )
-            }
-            scrollBarStyle = WebView.SCROLLBARS_INSIDE_OVERLAY
-            settings.javaScriptEnabled = true
-            settings.builtInZoomControls = true
-            loadUrl(vm.currentUrl)
-        }!!
-    }, update = {
-    }, modifier = modifier)
-
-    BackHandler(
-        enabled = vm.backEnabled,
-        onBack = { vm.browseWebView.value?.goBack() }
-    )
-}
-
+/** Body sub components ----------------------------------------------- */
 @Composable
 fun CurrentTab(
     title: String,
@@ -318,7 +404,60 @@ fun CurrentTab(
                 contentDescription = null
             )
         }
-        Divider()
+    }
+}
+
+@Composable
+fun UrlTabRow(
+    modifier: Modifier = Modifier,
+    onTabClick: (Int) -> Unit,
+    siteInfoList: List<SiteInfo>
+) {
+    LazyRow(modifier) {
+        itemsIndexed(siteInfoList) { index, siteInfo ->
+            Column(
+                horizontalAlignment = Alignment.CenterHorizontally,
+                modifier = Modifier
+                    .padding(end = 16.dp)
+                    .clickable { onTabClick(index) }
+            ) {
+                Favicon(
+                    url = Urls.GoogleFavicon(siteInfo.url).url,
+                    Modifier
+                        .size(50.dp)
+                        .background(
+                            shape = RoundedCornerShape(114.dp),
+                            color = MaterialTheme.colors.primary.copy(alpha = 0.1f)
+                        )
+                        .padding(12.dp)
+                )
+                Text(
+                    text = siteInfo.title,
+                    overflow = TextOverflow.Ellipsis,
+                    maxLines = 1,
+                    style = MaterialTheme.typography.overline,
+                    textAlign = TextAlign.Center,
+                    modifier = Modifier.width(60.dp)
+                )
+            }
+        }
+    }
+}
+
+@Composable
+fun TabPlusIcon(onSearchTabClick: () -> Unit) {
+    IconButton(onClick = onSearchTabClick) {
+        Icon(
+            imageVector = Icons.Filled.Add,
+            contentDescription = null,
+            modifier = Modifier
+                .size(50.dp)
+                .background(
+                    shape = RoundedCornerShape(114.dp),
+                    color = MaterialTheme.colors.primary.copy(alpha = 0.1f)
+                )
+                .padding(12.dp)
+        )
     }
 }
 
