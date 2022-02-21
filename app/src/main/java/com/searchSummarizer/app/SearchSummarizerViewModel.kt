@@ -4,50 +4,48 @@ import android.app.Application
 import android.webkit.URLUtil
 import android.webkit.WebView
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateListOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
 import androidx.lifecycle.AndroidViewModel
-import com.searchSummarizer.data.SiteInfo
 
 class SearchSummarizerViewModel(application: Application) : AndroidViewModel(application) {
 
     private val context get() = getApplication<Application>().applicationContext
 
-    var browseWebView by mutableStateOf(WebView(context))
+    var webViewList: MutableList<WebView> = mutableStateListOf()
 
-    var siteInfoList: MutableList<SiteInfo> =
-        mutableListOf(SiteInfo("https://google.com", "Google", false, null))
-
-    var extended by mutableStateOf(true)
+    init {
+        webViewList.add(WebView(context))
+        webViewList[0].loadUrl("https://google.com")
+    }
+    var extended: Boolean by mutableStateOf(true)
 
     var keyword: String by mutableStateOf("")
 
-    var currentTabIndex by mutableStateOf(0)
+    var webViewIndex: Int by mutableStateOf(0)
+
+    var backEnabled: Boolean by mutableStateOf(false)
 
     fun onSearch() {
         extended = !extended
-        siteInfoList[currentTabIndex].url = when {
+        val url = when {
             keyword == "" -> return // empty
             URLUtil.isValidUrl(keyword) -> keyword // valid url
             else -> "https://www.google.com/search?q=$keyword" // keyword
         }
+        webViewList[webViewIndex].loadUrl(url)
     }
 
     fun onSwitchTab(tabIndex: Int) {
-        currentTabIndex = tabIndex
+        webViewIndex = tabIndex
         extended = !extended
     }
 
     fun onAddTab() {
-        siteInfoList.add(
-            SiteInfo(
-                "https://google.com",
-                "Google",
-                false,
-                null
-            )
-        )
-        currentTabIndex = siteInfoList.size - 1
+        webViewList.add(WebView(context))
+        webViewIndex = webViewList.size - 1
+        webViewList[webViewIndex].loadUrl("https://google.com")
         extended = !extended
     }
 

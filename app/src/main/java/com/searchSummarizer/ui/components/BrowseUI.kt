@@ -70,7 +70,6 @@ import coil.compose.rememberImagePainter
 import coil.transform.CircleCropTransformation
 import com.searchSummarizer.R
 import com.searchSummarizer.app.SearchSummarizerViewModel
-import com.searchSummarizer.data.SiteInfo
 import com.searchSummarizer.data.Urls
 import com.searchSummarizer.ui.browse.BrowseWebViewClient
 
@@ -78,7 +77,7 @@ import com.searchSummarizer.ui.browse.BrowseWebViewClient
 @OptIn(ExperimentalAnimationApi::class)
 @Composable
 fun BrowseHeader(vm: SearchSummarizerViewModel = viewModel()) {
-    val favIconUrls = vm.siteInfoList.map { Urls.GoogleFavicon(it.url).url }
+    val favIconUrls = vm.webViewList.map { Urls.GoogleFavicon(it.url.toString()).url }
     val extended = vm.extended
     Row(
         modifier = Modifier
@@ -287,9 +286,9 @@ private fun BrowseWebView(
     vm: SearchSummarizerViewModel = viewModel(),
     useDarkTheme: Boolean = isSystemInDarkTheme(),
 ) {
-    val siteInfo = vm.siteInfoList[vm.currentTabIndex]
+    val webView = vm.webViewList[vm.webViewIndex]
     AndroidView(factory = {
-        vm.browseWebView.also {
+        webView.also {
             it.layoutParams = ViewGroup.LayoutParams(
                 ViewGroup.LayoutParams.MATCH_PARENT,
                 ViewGroup.LayoutParams.MATCH_PARENT
@@ -305,21 +304,21 @@ private fun BrowseWebView(
             it.scrollBarStyle = WebView.SCROLLBARS_INSIDE_OVERLAY
             it.settings.javaScriptEnabled = true
             it.settings.builtInZoomControls = true
-            it.loadUrl(siteInfo.url)
+            it.loadUrl(webView.url.toString())
         }
     }, update = {
     }, modifier = modifier)
 
     BackHandler(
-        enabled = siteInfo.backEnabled,
-        onBack = { vm.browseWebView.goBack() }
+        enabled = vm.backEnabled,
+        onBack = { webView.goBack() }
     )
 }
 
 @OptIn(ExperimentalAnimationApi::class)
 @Composable
 private fun ExpandedView(vm: SearchSummarizerViewModel = viewModel()) {
-    val siteInfo = vm.siteInfoList[vm.currentTabIndex]
+    val webView = vm.webViewList[vm.webViewIndex]
     AnimatedVisibility(
         visible = !vm.extended,
         enter = fadeIn(),
@@ -330,8 +329,8 @@ private fun ExpandedView(vm: SearchSummarizerViewModel = viewModel()) {
         ) {
             Column {
                 CurrentTab(
-                    title = siteInfo.title,
-                    url = siteInfo.url
+                    title = webView.title.toString(),
+                    url = webView.url.toString()
                 )
                 Divider()
                 Row(
@@ -340,7 +339,7 @@ private fun ExpandedView(vm: SearchSummarizerViewModel = viewModel()) {
                     UrlTabRow(
                         modifier = Modifier.weight(1f),
                         onTabClick = vm::onSwitchTab,
-                        siteInfoList = vm.siteInfoList
+                        webViewList = vm.webViewList
                     )
                     Spacer(Modifier.padding(4.dp))
                     TabPlusIcon(vm::onAddTab)
@@ -411,10 +410,10 @@ fun CurrentTab(
 fun UrlTabRow(
     modifier: Modifier = Modifier,
     onTabClick: (Int) -> Unit,
-    siteInfoList: List<SiteInfo>
+    webViewList: List<WebView>
 ) {
     LazyRow(modifier) {
-        itemsIndexed(siteInfoList) { index, siteInfo ->
+        itemsIndexed(webViewList) { index, webView ->
             Column(
                 horizontalAlignment = Alignment.CenterHorizontally,
                 modifier = Modifier
@@ -422,7 +421,7 @@ fun UrlTabRow(
                     .clickable { onTabClick(index) }
             ) {
                 Favicon(
-                    url = Urls.GoogleFavicon(siteInfo.url).url,
+                    url = Urls.GoogleFavicon(webView.url.toString()).url,
                     Modifier
                         .size(50.dp)
                         .background(
@@ -432,7 +431,7 @@ fun UrlTabRow(
                         .padding(12.dp)
                 )
                 Text(
-                    text = siteInfo.title,
+                    text = webView.title.toString(),
                     overflow = TextOverflow.Ellipsis,
                     maxLines = 1,
                     style = MaterialTheme.typography.overline,
