@@ -311,7 +311,7 @@ private fun BrowseWebView(
 
     BackHandler(
         enabled = vm.backEnabled,
-        onBack = { webView.goBack() }
+        onBack = vm::onBack
     )
 }
 

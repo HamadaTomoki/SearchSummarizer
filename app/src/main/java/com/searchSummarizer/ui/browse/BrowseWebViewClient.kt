@@ -14,7 +14,10 @@ class BrowseWebViewClient(
 ) : WebViewClient() {
     override fun onPageStarted(view: WebView?, url: String?, favicon: Bitmap?) {
         super.onPageStarted(view, url, favicon)
-        vm.backEnabled = view?.canGoBack() == true
+        requireNotNull(url)
+        val urlHistoryItem = vm.urlHistory[vm.webViewIndex]
+        if (urlHistoryItem.isEmpty() || urlHistoryItem.last() != url) urlHistoryItem.add(url)
+        vm.backEnabled = urlHistoryItem.size > 1
     }
 
     @RequiresApi(Build.VERSION_CODES.M)

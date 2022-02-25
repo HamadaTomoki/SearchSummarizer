@@ -14,18 +14,24 @@ class SearchSummarizerViewModel(application: Application) : AndroidViewModel(app
     private val context get() = getApplication<Application>().applicationContext
 
     var webViewList: MutableList<WebView> = mutableStateListOf()
+    var webViewIndex: Int by mutableStateOf(0)
+    var urlHistory: MutableList<MutableList<String>> = mutableStateListOf(mutableListOf("https://www.google.com/"))
 
     init {
         webViewList.add(WebView(context))
-        webViewList[0].loadUrl("https://google.com")
+        webViewList[webViewIndex].loadUrl(urlHistory[webViewIndex].last())
     }
+
     var extended: Boolean by mutableStateOf(true)
 
     var keyword: String by mutableStateOf("")
 
-    var webViewIndex: Int by mutableStateOf(0)
-
     var backEnabled: Boolean by mutableStateOf(false)
+
+    fun onBack() {
+        urlHistory[webViewIndex].removeLast()
+        webViewList[webViewIndex].loadUrl(urlHistory[webViewIndex].last())
+    }
 
     fun onSearch() {
         extended = !extended
@@ -44,6 +50,7 @@ class SearchSummarizerViewModel(application: Application) : AndroidViewModel(app
 
     fun onAddTab() {
         webViewList.add(WebView(context))
+        urlHistory.add(mutableListOf())
         webViewIndex = webViewList.size - 1
         webViewList[webViewIndex].loadUrl("https://google.com")
         extended = !extended
