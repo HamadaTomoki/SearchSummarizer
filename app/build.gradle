@@ -75,8 +75,10 @@ dependencies {
     implementation "com.google.accompanist:accompanist-systemuicontroller:0.17.0"
     implementation "com.google.accompanist:accompanist-insets:0.20.2"
     implementation "io.coil-kt:coil-compose:1.4.0"
-    implementation "dev.burnoo:cokoin-android-viewmodel:0.3.3"
-    implementation "dev.burnoo:cokoin-android-navigation:0.3.3"
+    var koin_version = "3.1.5"
+    implementation "io.insert-koin:koin-android:$koin_version"
+    implementation "io.insert-koin:koin-androidx-navigation:$koin_version"
+    implementation "io.insert-koin:koin-androidx-compose:$koin_version"
     implementation 'androidx.webkit:webkit:1.4.0'
     implementation 'androidx.navigation:navigation-compose:2.5.0-alpha01'
     implementation "androidx.compose.material:material-icons-extended:$compose_version"
