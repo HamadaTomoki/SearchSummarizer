@@ -1,4 +1,4 @@
-package com.searchSummarizer.data
+package com.searchSummarizer.data.enumType
 
 sealed class Urls(val url: String) {
     data class GoogleFavicon(private val iconUrl: String) :

@@ -6,25 +6,32 @@ import androidx.activity.compose.setContent
 import androidx.compose.runtime.Composable
 import androidx.core.view.WindowCompat
 import androidx.navigation.NavGraphBuilder
+import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
+import com.searchSummarizer.data.enumType.Screen
 import com.searchSummarizer.di.searchSummarizerAppModule
 import com.searchSummarizer.di.viewModelModule
 import com.searchSummarizer.ui.browse.BrowseScreen
 import com.searchSummarizer.ui.theme.SearchSummarizerTheme
-import dev.burnoo.cokoin.Koin
-import dev.burnoo.cokoin.navigation.KoinNavHost
+import org.koin.android.ext.koin.androidContext
+import org.koin.androidx.viewmodel.ext.android.viewModel
+import org.koin.core.context.startKoin
 
 class SearchSummarizerActivity : ComponentActivity() {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+        startKoin {
+            androidContext(this@SearchSummarizerActivity)
+            modules(listOf(viewModelModule, searchSummarizerAppModule))
+        }
+        val vm: SearchSummarizerViewModel by viewModel()
+        lifecycle.addObserver(vm)
         setContent {
-            Koin(appDeclaration = { modules(listOf(viewModelModule, searchSummarizerAppModule)) }) {
-                SearchSummarizerTheme {
-                    WindowCompat.setDecorFitsSystemWindows(window, false)
-                    SearchSummarizerApp()
-                }
+            SearchSummarizerTheme {
+                WindowCompat.setDecorFitsSystemWindows(window, false)
+                SearchSummarizerApp()
             }
         }
     }
@@ -33,7 +40,7 @@ class SearchSummarizerActivity : ComponentActivity() {
 @Composable
 fun SearchSummarizerApp() {
     val navController = rememberNavController()
-    KoinNavHost(navController, startDestination = Screen.Browse.route) {
+    NavHost(navController, startDestination = Screen.Browse.route) {
         addBrowseGraph()
     }
 }

@@ -63,20 +63,20 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.viewinterop.AndroidView
-import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.webkit.WebSettingsCompat
 import androidx.webkit.WebViewFeature
 import coil.compose.rememberImagePainter
 import coil.transform.CircleCropTransformation
 import com.searchSummarizer.R
 import com.searchSummarizer.app.SearchSummarizerViewModel
-import com.searchSummarizer.data.Urls
+import com.searchSummarizer.data.enumType.Urls
 import com.searchSummarizer.ui.browse.BrowseWebViewClient
+import org.koin.androidx.compose.getViewModel
 
 /** Header -------------------------------------------------- */
 @OptIn(ExperimentalAnimationApi::class)
 @Composable
-fun BrowseHeader(vm: SearchSummarizerViewModel = viewModel()) {
+fun BrowseHeader(vm: SearchSummarizerViewModel = getViewModel()) {
     val favIconUrls = vm.webViewList.map { Urls.GoogleFavicon(it.url.toString()).url }
     val extended = vm.extended
     Row(
@@ -215,7 +215,7 @@ private fun SearchTabContent(
 @Composable
 fun SearchTextField(
     modifier: Modifier = Modifier,
-    vm: SearchSummarizerViewModel = viewModel()
+    vm: SearchSummarizerViewModel = getViewModel()
 ) {
 
     val value = vm.keyword
@@ -283,7 +283,7 @@ fun BrowseBody(extended: Boolean) {
 @Composable
 private fun BrowseWebView(
     modifier: Modifier = Modifier,
-    vm: SearchSummarizerViewModel = viewModel(),
+    vm: SearchSummarizerViewModel = getViewModel(),
     useDarkTheme: Boolean = isSystemInDarkTheme(),
 ) {
     val webView = vm.webViewList[vm.webViewIndex]
@@ -317,7 +317,7 @@ private fun BrowseWebView(
 
 @OptIn(ExperimentalAnimationApi::class)
 @Composable
-private fun ExpandedView(vm: SearchSummarizerViewModel = viewModel()) {
+private fun ExpandedView(vm: SearchSummarizerViewModel = getViewModel()) {
     val webView = vm.webViewList[vm.webViewIndex]
     AnimatedVisibility(
         visible = !vm.extended,

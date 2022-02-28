@@ -1,11 +1,15 @@
 package com.searchSummarizer.di
 
 import com.searchSummarizer.app.SearchSummarizerViewModel
-import org.koin.androidx.viewmodel.dsl.viewModel
+import com.searchSummarizer.data.repo.browser.BrowserRepositoryImpl
+import com.searchSummarizer.data.repo.context.ContextRepositoryImpl
 import org.koin.dsl.module
 
 val viewModelModule = module {
-    viewModel {
-        SearchSummarizerViewModel(get())
+    single {
+        SearchSummarizerViewModel(
+            browserRepository = get<BrowserRepositoryImpl>(),
+            contextRepository = get<ContextRepositoryImpl>()
+        )
     }
 }

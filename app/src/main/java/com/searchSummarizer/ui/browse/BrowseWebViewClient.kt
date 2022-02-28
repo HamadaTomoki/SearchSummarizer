@@ -16,7 +16,7 @@ class BrowseWebViewClient(
         super.onPageStarted(view, url, favicon)
         requireNotNull(url)
         val urlHistoryItem = vm.urlHistory[vm.webViewIndex]
-        if (urlHistoryItem.isEmpty() || urlHistoryItem.last() != url) urlHistoryItem.add(url)
+        if (urlHistoryItem.isEmpty() || urlHistoryItem.last() != url) vm.urlHistory[vm.webViewIndex].add(url)
         vm.backEnabled = urlHistoryItem.size > 1
     }
 
