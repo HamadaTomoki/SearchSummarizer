@@ -1,6 +1,5 @@
-package com.searchSummarizer.ui.browse
+package com.searchSummarizer.ui.browser
 
-import android.view.Surface
 import androidx.compose.animation.ExperimentalAnimationApi
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
@@ -11,22 +10,22 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
-import com.searchSummarizer.app.SearchSummarizerViewModel
-import com.searchSummarizer.ui.components.BrowseBody
-import com.searchSummarizer.ui.components.BrowseHeader
+import com.searchSummarizer.app.browser.BrowserViewModel
+import com.searchSummarizer.ui.components.BrowserBody
+import com.searchSummarizer.ui.components.BrowserHeader
 import com.searchSummarizer.ui.theme.SearchSummarizerTheme
 import org.koin.androidx.compose.getViewModel
 
 @OptIn(ExperimentalAnimationApi::class)
 @Composable
-fun BrowseScreen(vm: SearchSummarizerViewModel = getViewModel()) {
+fun BrowseScreen(vm: BrowserViewModel = getViewModel()) {
     Surface(
         color = MaterialTheme.colors.primary.copy(alpha = 0.5f),
         modifier = Modifier.fillMaxSize()
     ) {
         Column(Modifier.padding(top = 48.dp)) {
-            BrowseHeader()
-            BrowseBody(vm.extended)
+            BrowserHeader()
+            BrowserBody(vm.extended)
         }
     }
 }

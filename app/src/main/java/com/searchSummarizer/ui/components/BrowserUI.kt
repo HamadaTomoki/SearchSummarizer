@@ -65,18 +65,16 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.viewinterop.AndroidView
 import androidx.webkit.WebSettingsCompat
 import androidx.webkit.WebViewFeature
-import coil.compose.rememberImagePainter
-import coil.transform.CircleCropTransformation
 import com.searchSummarizer.R
-import com.searchSummarizer.app.SearchSummarizerViewModel
+import com.searchSummarizer.app.browser.BrowserViewModel
 import com.searchSummarizer.data.enumType.Urls
-import com.searchSummarizer.ui.browse.BrowseWebViewClient
+import com.searchSummarizer.ui.browser.BrowserWebViewClient
 import org.koin.androidx.compose.getViewModel
 
 /** Header -------------------------------------------------- */
 @OptIn(ExperimentalAnimationApi::class)
 @Composable
-fun BrowseHeader(vm: SearchSummarizerViewModel = getViewModel()) {
+fun BrowserHeader(vm: BrowserViewModel = getViewModel()) {
     val favIconUrls = vm.webViewList.map { Urls.GoogleFavicon(it.url.toString()).url }
     val extended = vm.extended
     Row(
@@ -215,7 +213,7 @@ private fun SearchTabContent(
 @Composable
 fun SearchTextField(
     modifier: Modifier = Modifier,
-    vm: SearchSummarizerViewModel = getViewModel()
+    vm: BrowserViewModel = getViewModel()
 ) {
 
     val value = vm.keyword
@@ -271,9 +269,9 @@ fun SearchTextField(
 /** Body -------------------------------------------------- */
 @OptIn(ExperimentalAnimationApi::class, ExperimentalComposeUiApi::class)
 @Composable
-fun BrowseBody(extended: Boolean) {
+fun BrowserBody(extended: Boolean) {
     Box {
-        if (extended) BrowseWebView(Modifier.fillMaxSize())
+        if (extended) BrowserWebView(Modifier.fillMaxSize())
         ExpandedView()
     }
 }
@@ -281,9 +279,9 @@ fun BrowseBody(extended: Boolean) {
 /** Body main components -------------------------------------------------- */
 @SuppressLint("SetJavaScriptEnabled")
 @Composable
-private fun BrowseWebView(
+private fun BrowserWebView(
     modifier: Modifier = Modifier,
-    vm: SearchSummarizerViewModel = getViewModel(),
+    vm: BrowserViewModel = getViewModel(),
     useDarkTheme: Boolean = isSystemInDarkTheme(),
 ) {
     val webView = vm.webViewList[vm.webViewIndex]
@@ -293,7 +291,7 @@ private fun BrowseWebView(
                 ViewGroup.LayoutParams.MATCH_PARENT,
                 ViewGroup.LayoutParams.MATCH_PARENT
             )
-            it.webViewClient = BrowseWebViewClient(vm = vm)
+            it.webViewClient = BrowserWebViewClient(vm)
             if (WebViewFeature.isFeatureSupported(WebViewFeature.FORCE_DARK)) {
                 WebSettingsCompat.setForceDark(
                     it.settings,
@@ -317,7 +315,7 @@ private fun BrowseWebView(
 
 @OptIn(ExperimentalAnimationApi::class)
 @Composable
-private fun ExpandedView(vm: SearchSummarizerViewModel = getViewModel()) {
+private fun ExpandedView(vm: BrowserViewModel = getViewModel()) {
     val webView = vm.webViewList[vm.webViewIndex]
     AnimatedVisibility(
         visible = !vm.extended,
@@ -458,24 +456,4 @@ fun TabPlusIcon(onSearchTabClick: () -> Unit) {
                 .padding(12.dp)
         )
     }
-}
-
-@Composable
-private fun Favicon(
-    url: String,
-    modifier: Modifier = Modifier
-) {
-    Image(
-        painter = rememberImagePainter(
-            data = url,
-            builder = {
-                error(R.drawable.baseline_public)
-                crossfade(true)
-                placeholder(R.drawable.ic_launcher_foreground)
-                transformations(CircleCropTransformation())
-            }
-        ),
-        contentDescription = null,
-        modifier = modifier
-    )
 }

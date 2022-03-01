@@ -9,10 +9,11 @@ import androidx.navigation.NavGraphBuilder
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
+import com.searchSummarizer.app.browser.BrowserViewModel
 import com.searchSummarizer.data.enumType.Screen
 import com.searchSummarizer.di.searchSummarizerAppModule
 import com.searchSummarizer.di.viewModelModule
-import com.searchSummarizer.ui.browse.BrowseScreen
+import com.searchSummarizer.ui.browser.BrowseScreen
 import com.searchSummarizer.ui.theme.SearchSummarizerTheme
 import org.koin.android.ext.koin.androidContext
 import org.koin.androidx.viewmodel.ext.android.viewModel
@@ -20,20 +21,26 @@ import org.koin.core.context.startKoin
 
 class SearchSummarizerActivity : ComponentActivity() {
 
+    private val browserViewModel: BrowserViewModel by viewModel()
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         startKoin {
             androidContext(this@SearchSummarizerActivity)
             modules(listOf(viewModelModule, searchSummarizerAppModule))
         }
-        val vm: SearchSummarizerViewModel by viewModel()
-        lifecycle.addObserver(vm)
+        browserViewModel.restoreBrowserHistory()
         setContent {
             SearchSummarizerTheme {
                 WindowCompat.setDecorFitsSystemWindows(window, false)
                 SearchSummarizerApp()
             }
         }
+    }
+
+    override fun onSaveInstanceState(outState: Bundle) {
+        super.onSaveInstanceState(outState)
+        browserViewModel.saveBrowserHistory()
     }
 }
 

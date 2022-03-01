@@ -1,4 +1,4 @@
-package com.searchSummarizer.app
+package com.searchSummarizer.app.browser
 
 import android.webkit.URLUtil
 import android.webkit.WebView
@@ -6,8 +6,6 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateListOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
-import androidx.lifecycle.DefaultLifecycleObserver
-import androidx.lifecycle.LifecycleOwner
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.searchSummarizer.data.model.BrowserHistory
@@ -16,10 +14,10 @@ import com.searchSummarizer.data.repo.context.ContextRepository
 import kotlinx.coroutines.flow.collect
 import kotlinx.coroutines.launch
 
-class SearchSummarizerViewModel(
+class BrowserViewModel(
     private val browserRepository: BrowserRepository,
     private val contextRepository: ContextRepository,
-) : ViewModel(), DefaultLifecycleObserver {
+) : ViewModel() {
 
     var webViewList: MutableList<WebView> = mutableStateListOf(WebView(contextRepository.createContext()))
     var webViewIndex: Int by mutableStateOf(0)
@@ -30,26 +28,6 @@ class SearchSummarizerViewModel(
     var keyword: String by mutableStateOf("")
 
     var backEnabled: Boolean by mutableStateOf(false)
-
-    init {
-        viewModelScope.launch {
-            browserRepository.browserHistoryFlow.collect { browserHistory ->
-                if (browserHistory.urls.isNotEmpty()) {
-                    webViewList = mutableListOf()
-                    webViewIndex = browserHistory.selectedTabIndex
-                    urlHistory = browserHistory.urls.replace(" ", "").split("^").map {
-                        it.split(",").toMutableList()
-                    }.toMutableList()
-                    repeat(urlHistory.size) {
-                        webViewList.add(WebView(contextRepository.createContext()))
-                        webViewList[it].loadUrl(urlHistory[it].last())
-                    }
-                } else {
-                    webViewList[0].loadUrl(urlHistory[0].last())
-                }
-            }
-        }
-    }
 
     fun onBack() {
         urlHistory[webViewIndex].removeLast()
@@ -86,9 +64,29 @@ class SearchSummarizerViewModel(
         }
     }
 
-    override fun onPause(owner: LifecycleOwner) {
+    fun restoreBrowserHistory() {
         viewModelScope.launch {
-            browserRepository.updateBrowserHistory(
+            browserRepository.browserHistoryFlow.collect { browserHistory ->
+                if (browserHistory.urls.isNotEmpty()) {
+                    webViewList = mutableListOf()
+                    webViewIndex = browserHistory.selectedTabIndex
+                    urlHistory = browserHistory.urls.replace(" ", "").split("^").map {
+                        it.split(",").toMutableList()
+                    }.toMutableList()
+                    repeat(urlHistory.size) {
+                        webViewList.add(WebView(contextRepository.createContext()))
+                        webViewList[it].loadUrl(urlHistory[it].last())
+                    }
+                } else {
+                    webViewList[0].loadUrl(urlHistory[0].last())
+                }
+            }
+        }
+    }
+
+    fun saveBrowserHistory() {
+        viewModelScope.launch {
+            browserRepository.saveBrowserHistory(
                 BrowserHistory(
                     webViewIndex,
                     urlHistory.joinToString("^") // one dimensional array separator is "^"

@@ -24,7 +24,7 @@ class BrowserRepositoryImpl(
                 }
             }
 
-    override suspend fun updateBrowserHistory(browserHistory: BrowserHistory) {
+    override suspend fun saveBrowserHistory(browserHistory: BrowserHistory) {
         browserHistoryStore.updateData { browserHistory }
     }
 }

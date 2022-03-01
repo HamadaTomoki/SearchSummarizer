@@ -1,4 +1,4 @@
-package com.searchSummarizer.ui.browse
+package com.searchSummarizer.ui.browser
 
 import android.graphics.Bitmap
 import android.os.Build
@@ -7,10 +7,10 @@ import android.webkit.WebResourceRequest
 import android.webkit.WebView
 import android.webkit.WebViewClient
 import androidx.annotation.RequiresApi
-import com.searchSummarizer.app.SearchSummarizerViewModel
+import com.searchSummarizer.app.browser.BrowserViewModel
 
-class BrowseWebViewClient(
-    val vm: SearchSummarizerViewModel
+class BrowserWebViewClient(
+    val vm: BrowserViewModel
 ) : WebViewClient() {
     override fun onPageStarted(view: WebView?, url: String?, favicon: Bitmap?) {
         super.onPageStarted(view, url, favicon)

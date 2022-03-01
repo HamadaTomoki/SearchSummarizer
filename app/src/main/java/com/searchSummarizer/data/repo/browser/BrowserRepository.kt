@@ -6,5 +6,5 @@ import kotlinx.coroutines.flow.Flow
 interface BrowserRepository {
     val browserHistoryFlow: Flow<BrowserHistory>
 
-    suspend fun updateBrowserHistory(browserHistory: BrowserHistory)
+    suspend fun saveBrowserHistory(browserHistory: BrowserHistory)
 }
