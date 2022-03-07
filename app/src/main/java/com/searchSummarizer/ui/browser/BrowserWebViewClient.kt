@@ -2,6 +2,7 @@ package com.searchSummarizer.ui.browser
 
 import android.graphics.Bitmap
 import android.os.Build
+import android.util.Log
 import android.webkit.WebResourceError
 import android.webkit.WebResourceRequest
 import android.webkit.WebView
@@ -10,14 +11,18 @@ import androidx.annotation.RequiresApi
 import com.searchSummarizer.app.browser.BrowserViewModel
 
 class BrowserWebViewClient(
-    val vm: BrowserViewModel
+    private val browserViewModel: BrowserViewModel
 ) : WebViewClient() {
     override fun onPageStarted(view: WebView?, url: String?, favicon: Bitmap?) {
         super.onPageStarted(view, url, favicon)
         requireNotNull(url)
-        val urlHistoryItem = vm.urlHistory[vm.webViewIndex]
-        if (urlHistoryItem.isEmpty() || urlHistoryItem.last() != url) vm.urlHistory[vm.webViewIndex].add(url)
-        vm.backEnabled = urlHistoryItem.size > 1
+        val tabIndex = browserViewModel.tabIndex
+        val urlHistory = browserViewModel.urlHistory
+        val urlHistoryItem = urlHistory[tabIndex]
+        if (urlHistoryItem.isEmpty() || urlHistoryItem.last() != url) {
+            urlHistory[tabIndex].add(url)
+        }
+        browserViewModel.backEnabled = urlHistoryItem.size > 1
     }
 
     @RequiresApi(Build.VERSION_CODES.M)

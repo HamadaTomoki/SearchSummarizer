@@ -1,6 +1,7 @@
 package com.searchSummarizer.app
 
 import android.os.Bundle
+import android.util.Log
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.compose.runtime.Composable
@@ -17,6 +18,7 @@ import com.searchSummarizer.ui.browser.BrowseScreen
 import com.searchSummarizer.ui.theme.SearchSummarizerTheme
 import org.koin.android.ext.koin.androidContext
 import org.koin.androidx.viewmodel.ext.android.viewModel
+import org.koin.core.context.GlobalContext
 import org.koin.core.context.startKoin
 
 class SearchSummarizerActivity : ComponentActivity() {
@@ -25,7 +27,7 @@ class SearchSummarizerActivity : ComponentActivity() {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        startKoin {
+        GlobalContext.getOrNull() ?: startKoin {
             androidContext(this@SearchSummarizerActivity)
             modules(listOf(viewModelModule, searchSummarizerAppModule))
         }

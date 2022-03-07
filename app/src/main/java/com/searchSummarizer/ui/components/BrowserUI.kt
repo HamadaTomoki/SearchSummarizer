@@ -1,6 +1,7 @@
 package com.searchSummarizer.ui.components
 
 import android.annotation.SuppressLint
+import android.util.Log
 import android.view.ViewGroup
 import android.webkit.WebView
 import androidx.activity.compose.BackHandler
@@ -75,7 +76,7 @@ import org.koin.androidx.compose.getViewModel
 @OptIn(ExperimentalAnimationApi::class)
 @Composable
 fun BrowserHeader(vm: BrowserViewModel = getViewModel()) {
-    val favIconUrls = vm.webViewList.map { Urls.GoogleFavicon(it.url.toString()).url }
+    val favIconUrls = vm.urlHistory.map { Urls.GoogleFavicon(it.last()).url }
     val extended = vm.extended
     Row(
         modifier = Modifier
@@ -284,7 +285,7 @@ private fun BrowserWebView(
     vm: BrowserViewModel = getViewModel(),
     useDarkTheme: Boolean = isSystemInDarkTheme(),
 ) {
-    val webView = vm.webViewList[vm.webViewIndex]
+    val webView = vm.webView
     AndroidView(factory = {
         webView.also {
             it.layoutParams = ViewGroup.LayoutParams(
@@ -302,7 +303,7 @@ private fun BrowserWebView(
             it.scrollBarStyle = WebView.SCROLLBARS_INSIDE_OVERLAY
             it.settings.javaScriptEnabled = true
             it.settings.builtInZoomControls = true
-            it.loadUrl(webView.url.toString())
+            it.settings.displayZoomControls = false
         }
     }, update = {
     }, modifier = modifier)
@@ -316,7 +317,7 @@ private fun BrowserWebView(
 @OptIn(ExperimentalAnimationApi::class)
 @Composable
 private fun ExpandedView(vm: BrowserViewModel = getViewModel()) {
-    val webView = vm.webViewList[vm.webViewIndex]
+    val webView = vm.webView
     AnimatedVisibility(
         visible = !vm.extended,
         enter = fadeIn(),
@@ -337,7 +338,7 @@ private fun ExpandedView(vm: BrowserViewModel = getViewModel()) {
                     UrlTabRow(
                         modifier = Modifier.weight(1f),
                         onTabClick = vm::onSwitchTab,
-                        webViewList = vm.webViewList
+                        urlHistory = vm.urlHistory
                     )
                     Spacer(Modifier.padding(4.dp))
                     TabPlusIcon(vm::onAddTab)
@@ -408,10 +409,10 @@ fun CurrentTab(
 fun UrlTabRow(
     modifier: Modifier = Modifier,
     onTabClick: (Int) -> Unit,
-    webViewList: List<WebView>
+    urlHistory: List<List<String>>
 ) {
     LazyRow(modifier) {
-        itemsIndexed(webViewList) { index, webView ->
+        itemsIndexed(urlHistory) { index, urlHistory ->
             Column(
                 horizontalAlignment = Alignment.CenterHorizontally,
                 modifier = Modifier
@@ -419,7 +420,7 @@ fun UrlTabRow(
                     .clickable { onTabClick(index) }
             ) {
                 Favicon(
-                    url = Urls.GoogleFavicon(webView.url.toString()).url,
+                    url = Urls.GoogleFavicon(urlHistory.last()).url,
                     Modifier
                         .size(50.dp)
                         .background(
@@ -429,7 +430,7 @@ fun UrlTabRow(
                         .padding(12.dp)
                 )
                 Text(
-                    text = webView.title.toString(),
+                    text = "google",
                     overflow = TextOverflow.Ellipsis,
                     maxLines = 1,
                     style = MaterialTheme.typography.overline,
