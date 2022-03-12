@@ -23,40 +23,40 @@ import androidx.compose.ui.graphics.Path
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
-import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import androidx.navigation.NavController
 import com.searchSummarizer.R
-import com.searchSummarizer.ui.theme.SearchSummarizerTheme
+import com.searchSummarizer.data.enumType.Screen
 
 @Composable
 fun StartUpScreen(
-    modifier: Modifier = Modifier
+    navController: NavController
 ) {
     Surface(
         color = MaterialTheme.colors.primary,
-        modifier = modifier.fillMaxSize()
+        modifier = Modifier.fillMaxSize()
     ) {
         StartUpCanvas(
             color = MaterialTheme.colors.onPrimary.copy(alpha = 0.5f)
         )
         Column(
             horizontalAlignment = Alignment.CenterHorizontally,
-            modifier = modifier.padding(top = 190.dp)
+            modifier = Modifier.padding(top = 190.dp)
         ) {
             Image(
                 painter = painterResource(id = R.drawable.web_search),
                 contentDescription = "web_search",
-                modifier = modifier.background(
+                modifier = Modifier.background(
                     shape = RoundedCornerShape(50.dp),
                     color = MaterialTheme.colors.primary.copy(alpha = 0.3f)
                 )
             )
-            Spacer(modifier.padding(70.dp))
+            Spacer(Modifier.padding(70.dp))
             Text(
                 text = "再検索をスムーズに",
                 style = MaterialTheme.typography.h6.copy(fontWeight = FontWeight.Bold)
             )
-            Spacer(modifier.padding(12.dp))
+            Spacer(Modifier.padding(12.dp))
             Text(
                 text =
                 """
@@ -67,9 +67,9 @@ fun StartUpScreen(
                 """.trimIndent(),
                 textAlign = TextAlign.Center
             )
-            Spacer(modifier.padding(16.dp))
+            Spacer(Modifier.padding(16.dp))
             OutlinedButton(
-                onClick = { /*TODO*/ },
+                onClick = { navController.navigate(Screen.Browser.route) },
                 shape = RoundedCornerShape(25.dp),
                 modifier = Modifier
                     .height(48.dp)
@@ -81,22 +81,6 @@ fun StartUpScreen(
                 )
             }
         }
-    }
-}
-
-@Preview
-@Composable
-fun StartUpScreenPreview() {
-    SearchSummarizerTheme {
-        StartUpScreen()
-    }
-}
-
-@Preview
-@Composable
-fun StartUpScreenDarkPreview() {
-    SearchSummarizerTheme(useDarkTheme = true) {
-        StartUpScreen()
     }
 }
 

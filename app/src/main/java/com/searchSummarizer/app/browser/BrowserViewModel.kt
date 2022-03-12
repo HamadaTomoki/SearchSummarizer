@@ -7,6 +7,8 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateListOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
+import androidx.lifecycle.DefaultLifecycleObserver
+import androidx.lifecycle.LifecycleOwner
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.searchSummarizer.data.enumType.Urls
@@ -18,19 +20,26 @@ import kotlinx.coroutines.launch
 
 class BrowserViewModel(
     private val browserRepository: BrowserRepository,
-    private val contextRepository: ContextRepository,
-) : ViewModel() {
+    contextRepository: ContextRepository,
+) : ViewModel(), DefaultLifecycleObserver {
 
     var webView: WebView by mutableStateOf(WebView(contextRepository.createContext()))
     var tabIndex: Int by mutableStateOf(0)
     var urlHistory: MutableList<MutableList<String>> =
-        mutableStateListOf(mutableListOf(Urls.Google.url))
+        mutableStateListOf(mutableStateListOf(Urls.Default.url))
+    var titles: MutableList<String> = mutableStateListOf(defaultTitle)
 
     var extended: Boolean by mutableStateOf(true)
-
     var keyword: String by mutableStateOf("")
-
     var backEnabled: Boolean by mutableStateOf(false)
+
+    override fun onPause(owner: LifecycleOwner) {
+        super.onPause(owner)
+        urlHistory.forEach {
+            Log.i("hoge", it.last())
+        }
+        saveBrowserHistory()
+    }
 
     fun onBack() {
         urlHistory[tabIndex].removeLast()
@@ -54,9 +63,10 @@ class BrowserViewModel(
     }
 
     fun onAddTab() {
-        urlHistory.add(mutableListOf(Urls.Google.url))
+        urlHistory.add(mutableListOf(Urls.Default.url))
         tabIndex++
-        webView.loadUrl(Urls.Google.url)
+        titles.add(defaultTitle)
+        webView.loadUrl(Urls.Default.url)
         extended = !extended
     }
 
@@ -72,6 +82,7 @@ class BrowserViewModel(
             browserRepository.browserHistoryFlow.collect { browserHistory ->
                 if (browserHistory.urls.isNotEmpty()) {
                     tabIndex = browserHistory.selectedTabIndex
+                    titles = browserHistory.titles.replace(" ", "").split(",").toMutableList()
                     urlHistory = browserHistory.urls.replace(" ", "").split("^").map {
                         it.split(",").toMutableList()
                     }.toMutableList()
@@ -87,11 +98,14 @@ class BrowserViewModel(
         viewModelScope.launch {
             browserRepository.saveBrowserHistory(
                 BrowserHistory(
-                    tabIndex,
-                    urlHistory.joinToString("^") // one dimensional array separator is "^"
+                    selectedTabIndex = tabIndex,
+                    titles = titles.joinToString(),
+                    urls = urlHistory.joinToString("^") // one dimensional array separator is "^"
                     { it.joinToString(",") } // two dimensional array separator is ","
                 )
             )
         }
     }
 }
+
+private const val defaultTitle = "Google"

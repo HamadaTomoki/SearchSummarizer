@@ -7,5 +7,6 @@ import kotlinx.serialization.Serializable
 data class BrowserHistory(
     @SerialName("selected_tab_index")
     var selectedTabIndex: Int = 0,
+    var titles: String = "",
     var urls: String = ""
 )

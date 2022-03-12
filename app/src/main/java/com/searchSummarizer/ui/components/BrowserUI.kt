@@ -1,7 +1,6 @@
 package com.searchSummarizer.ui.components
 
 import android.annotation.SuppressLint
-import android.util.Log
 import android.view.ViewGroup
 import android.webkit.WebView
 import androidx.activity.compose.BackHandler
@@ -338,7 +337,8 @@ private fun ExpandedView(vm: BrowserViewModel = getViewModel()) {
                     UrlTabRow(
                         modifier = Modifier.weight(1f),
                         onTabClick = vm::onSwitchTab,
-                        urlHistory = vm.urlHistory
+                        titles = vm.titles,
+                        urls = vm.urlHistory.map { it.last() }
                     )
                     Spacer(Modifier.padding(4.dp))
                     TabPlusIcon(vm::onAddTab)
@@ -409,10 +409,11 @@ fun CurrentTab(
 fun UrlTabRow(
     modifier: Modifier = Modifier,
     onTabClick: (Int) -> Unit,
-    urlHistory: List<List<String>>
+    titles: List<String>,
+    urls: List<String>
 ) {
     LazyRow(modifier) {
-        itemsIndexed(urlHistory) { index, urlHistory ->
+        itemsIndexed(urls) { index, urlHistory ->
             Column(
                 horizontalAlignment = Alignment.CenterHorizontally,
                 modifier = Modifier
@@ -420,7 +421,7 @@ fun UrlTabRow(
                     .clickable { onTabClick(index) }
             ) {
                 Favicon(
-                    url = Urls.GoogleFavicon(urlHistory.last()).url,
+                    url = Urls.GoogleFavicon(urlHistory).url,
                     Modifier
                         .size(50.dp)
                         .background(
@@ -430,7 +431,7 @@ fun UrlTabRow(
                         .padding(12.dp)
                 )
                 Text(
-                    text = "google",
+                    text = titles[index],
                     overflow = TextOverflow.Ellipsis,
                     maxLines = 1,
                     style = MaterialTheme.typography.overline,
