@@ -76,7 +76,7 @@ import org.koin.androidx.compose.getViewModel
 @Composable
 fun BrowserHeader(vm: BrowserViewModel = getViewModel()) {
     val favIconUrls = vm.urlHistory.map { Urls.GoogleFavicon(it.last()).url }
-    val extended = vm.extended
+    val extended = vm.expanded
     Row(
         modifier = Modifier
             .fillMaxWidth()
@@ -318,7 +318,7 @@ private fun BrowserWebView(
 private fun ExpandedView(vm: BrowserViewModel = getViewModel()) {
     val webView = vm.webView
     AnimatedVisibility(
-        visible = !vm.extended,
+        visible = !vm.expanded,
         enter = fadeIn(),
         exit = fadeOut()
     ) {
@@ -348,7 +348,7 @@ private fun ExpandedView(vm: BrowserViewModel = getViewModel()) {
         BackHandler(
             enabled = true,
             onBack = {
-                vm.extended = !vm.extended
+                vm.expanded = !vm.expanded
             }
         )
     }

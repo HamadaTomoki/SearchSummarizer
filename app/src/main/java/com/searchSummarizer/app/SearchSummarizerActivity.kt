@@ -1,6 +1,8 @@
 package com.searchSummarizer.app
 
+import android.content.Intent
 import android.os.Bundle
+import android.util.Log
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.compose.runtime.Composable
@@ -12,9 +14,11 @@ import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
 import com.searchSummarizer.app.browser.BrowserViewModel
 import com.searchSummarizer.data.enumType.Screen
+import com.searchSummarizer.data.model.SummarizedUrl
 import com.searchSummarizer.di.searchSummarizerAppModule
 import com.searchSummarizer.di.viewModelModule
 import com.searchSummarizer.ui.browser.BrowseScreen
+import com.searchSummarizer.ui.components.ConfirmAlertDialog
 import com.searchSummarizer.ui.startUp.StartUpScreen
 import com.searchSummarizer.ui.theme.SearchSummarizerTheme
 import org.koin.android.ext.koin.androidContext
@@ -34,9 +38,16 @@ class SearchSummarizerActivity : ComponentActivity() {
         }
         lifecycle.addObserver(browserViewModel)
         browserViewModel.restoreBrowserHistory()
+        val summarizedUrl = browserViewModel.findSummarizedUrl(intent)
         setContent {
             SearchSummarizerTheme {
                 WindowCompat.setDecorFitsSystemWindows(window, false)
+                if (summarizedUrl != null) {
+                    ConfirmAlertDialog(
+                        summarizedUrl = summarizedUrl,
+                        expandSummarizedUrl = browserViewModel::expandSummarizedUrl
+                    )
+                }
                 SearchSummarizerApp()
             }
         }

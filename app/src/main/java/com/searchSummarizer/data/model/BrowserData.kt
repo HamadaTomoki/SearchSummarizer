@@ -10,3 +10,12 @@ data class BrowserHistory(
     var titles: String = "",
     var urls: String = ""
 )
+
+@Serializable
+data class SummarizedUrl(
+    var id: String = "",
+    var name: String = "",
+    var author: String = "",
+    var titles: List<String> = listOf(),
+    var urls: List<String> = listOf()
+)

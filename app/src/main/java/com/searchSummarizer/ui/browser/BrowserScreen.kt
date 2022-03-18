@@ -25,7 +25,7 @@ fun BrowseScreen(vm: BrowserViewModel = getViewModel()) {
     ) {
         Column(Modifier.padding(top = 48.dp)) {
             BrowserHeader()
-            BrowserBody(vm.extended)
+            BrowserBody(vm.expanded)
         }
     }
 }

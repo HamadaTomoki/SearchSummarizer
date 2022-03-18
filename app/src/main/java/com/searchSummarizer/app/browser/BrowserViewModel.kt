@@ -1,6 +1,6 @@
 package com.searchSummarizer.app.browser
 
-import android.util.Log
+import android.content.Intent
 import android.webkit.URLUtil
 import android.webkit.WebView
 import androidx.compose.runtime.getValue
@@ -13,10 +13,12 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.searchSummarizer.data.enumType.Urls
 import com.searchSummarizer.data.model.BrowserHistory
+import com.searchSummarizer.data.model.SummarizedUrl
 import com.searchSummarizer.data.repo.browser.BrowserRepository
 import com.searchSummarizer.data.repo.context.ContextRepository
 import kotlinx.coroutines.flow.collect
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.runBlocking
 
 class BrowserViewModel(
     private val browserRepository: BrowserRepository,
@@ -29,15 +31,12 @@ class BrowserViewModel(
         mutableStateListOf(mutableStateListOf(Urls.Default.url))
     var titles: MutableList<String> = mutableStateListOf(defaultTitle)
 
-    var extended: Boolean by mutableStateOf(true)
+    var expanded: Boolean by mutableStateOf(true)
     var keyword: String by mutableStateOf("")
     var backEnabled: Boolean by mutableStateOf(false)
 
     override fun onPause(owner: LifecycleOwner) {
         super.onPause(owner)
-        urlHistory.forEach {
-            Log.i("hoge", it.last())
-        }
         saveBrowserHistory()
     }
 
@@ -47,7 +46,7 @@ class BrowserViewModel(
     }
 
     fun onSearch() {
-        extended = !extended
+        expanded = !expanded
         val url = when {
             keyword == "" -> return // empty
             URLUtil.isValidUrl(keyword) -> keyword // valid url
@@ -59,7 +58,7 @@ class BrowserViewModel(
     fun onSwitchTab(tabIndex: Int) {
         webView.loadUrl(urlHistory[tabIndex].last())
         this.tabIndex = tabIndex
-        extended = !extended
+        expanded = !expanded
     }
 
     fun onAddTab() {
@@ -67,13 +66,13 @@ class BrowserViewModel(
         tabIndex++
         titles.add(defaultTitle)
         webView.loadUrl(Urls.Default.url)
-        extended = !extended
+        expanded = !expanded
     }
 
     fun onTabClick() {
-        if (extended) {
+        if (expanded) {
             keyword = ""
-            extended = !extended
+            expanded = !expanded
         }
     }
 
@@ -94,7 +93,7 @@ class BrowserViewModel(
         }
     }
 
-    fun saveBrowserHistory() {
+    private fun saveBrowserHistory() {
         viewModelScope.launch {
             browserRepository.saveBrowserHistory(
                 BrowserHistory(
@@ -105,6 +104,20 @@ class BrowserViewModel(
                 )
             )
         }
+    }
+
+    fun findSummarizedUrl(intent: Intent): SummarizedUrl? = runBlocking {
+        val id = intent.data?.getQueryParameter("id") ?: return@runBlocking null
+        browserRepository.findSummarizedUrl(id)
+    }
+
+    fun expandSummarizedUrl(titles: List<String>, urls: List<String>) {
+        val expandedUrl = mutableListOf<MutableList<String>>()
+        urls.forEach { url ->
+            expandedUrl.add(mutableListOf(url))
+        }
+        this.titles = titles.toMutableList()
+        urlHistory = expandedUrl
     }
 }
 
