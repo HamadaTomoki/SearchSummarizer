@@ -1,5 +1,6 @@
 package com.searchSummarizer.app.browser
 
+import android.content.Intent
 import android.webkit.URLUtil
 import android.webkit.WebView
 import androidx.compose.runtime.getValue
@@ -8,59 +9,62 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.searchSummarizer.data.enumType.Urls
 import com.searchSummarizer.data.model.BrowserHistory
+import com.searchSummarizer.data.model.SummarizedUrl
 import com.searchSummarizer.data.repo.browser.BrowserRepository
 import com.searchSummarizer.data.repo.context.ContextRepository
-import kotlinx.coroutines.flow.collect
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.runBlocking
 
 class BrowserViewModel(
     private val browserRepository: BrowserRepository,
-    private val contextRepository: ContextRepository,
+    contextRepository: ContextRepository,
 ) : ViewModel() {
 
-    var webViewList: MutableList<WebView> = mutableStateListOf(WebView(contextRepository.createContext()))
-    var webViewIndex: Int by mutableStateOf(0)
-    var urlHistory: MutableList<MutableList<String>> = mutableStateListOf(mutableListOf("https://www.google.com/"))
+    var webView: WebView by mutableStateOf(WebView(contextRepository.createContext()))
+    var tabIndex: Int by mutableStateOf(0)
+    var urlHistory: MutableList<MutableList<String>> =
+        mutableStateListOf(mutableStateListOf(Urls.Default.url))
+    var titles: MutableList<String> = mutableStateListOf(defaultTitle)
 
-    var extended: Boolean by mutableStateOf(true)
-
+    var expanded: Boolean by mutableStateOf(true)
     var keyword: String by mutableStateOf("")
-
     var backEnabled: Boolean by mutableStateOf(false)
 
     fun onBack() {
-        urlHistory[webViewIndex].removeLast()
-        webViewList[webViewIndex].loadUrl(urlHistory[webViewIndex].last())
+        urlHistory[tabIndex].removeLast()
+        webView.loadUrl(urlHistory[tabIndex].last())
     }
 
     fun onSearch() {
-        extended = !extended
+        expanded = !expanded
         val url = when {
             keyword == "" -> return // empty
             URLUtil.isValidUrl(keyword) -> keyword // valid url
-            else -> "https://www.google.com/search?q=$keyword" // keyword
+            else -> Urls.GoogleSearch(keyword).url // keyword
         }
-        webViewList[webViewIndex].loadUrl(url)
+        webView.loadUrl(url)
     }
 
     fun onSwitchTab(tabIndex: Int) {
-        webViewIndex = tabIndex
-        extended = !extended
+        webView.loadUrl(urlHistory[tabIndex].last())
+        this.tabIndex = tabIndex
+        expanded = !expanded
     }
 
     fun onAddTab() {
-        webViewList.add(WebView(contextRepository.createContext()))
-        urlHistory.add(mutableListOf())
-        webViewIndex = webViewList.size - 1
-        webViewList[webViewIndex].loadUrl("https://www.google.com/")
-        extended = !extended
+        urlHistory.add(mutableListOf(Urls.Default.url))
+        tabIndex++
+        titles.add(defaultTitle)
+        webView.loadUrl(Urls.Default.url)
+        expanded = !expanded
     }
 
     fun onTabClick() {
-        if (extended) {
+        if (expanded) {
             keyword = ""
-            extended = !extended
+            expanded = !expanded
         }
     }
 
@@ -68,31 +72,44 @@ class BrowserViewModel(
         viewModelScope.launch {
             browserRepository.browserHistoryFlow.collect { browserHistory ->
                 if (browserHistory.urls.isNotEmpty()) {
-                    webViewList = mutableListOf()
-                    webViewIndex = browserHistory.selectedTabIndex
+                    tabIndex = browserHistory.selectedTabIndex
+                    titles = browserHistory.titles.replace(" ", "").split(",").toMutableList()
                     urlHistory = browserHistory.urls.replace(" ", "").split("^").map {
                         it.split(",").toMutableList()
                     }.toMutableList()
-                    repeat(urlHistory.size) {
-                        webViewList.add(WebView(contextRepository.createContext()))
-                        webViewList[it].loadUrl(urlHistory[it].last())
-                    }
+                    webView.loadUrl(urlHistory[tabIndex].last())
                 } else {
-                    webViewList[0].loadUrl(urlHistory[0].last())
+                    webView.loadUrl(urlHistory[0].last())
                 }
             }
         }
     }
 
-    fun saveBrowserHistory() {
-        viewModelScope.launch {
-            browserRepository.saveBrowserHistory(
-                BrowserHistory(
-                    webViewIndex,
-                    urlHistory.joinToString("^") // one dimensional array separator is "^"
-                    { it.joinToString(",") } // two dimensional array separator is ","
-                )
+    fun saveBrowserHistory() = runBlocking {
+        browserRepository.saveBrowserHistory(
+            BrowserHistory(
+                selectedTabIndex = tabIndex,
+                titles = titles.joinToString(),
+                urls = urlHistory.joinToString("^") // one dimensional array separator is "^"
+                { it.joinToString(",") } // two dimensional array separator is ","
             )
+        )
+    }
+
+    fun findSummarizedUrl(intent: Intent): SummarizedUrl? = runBlocking {
+        val id = intent.data?.getQueryParameter("id") ?: return@runBlocking null
+        browserRepository.findSummarizedUrl(id)
+    }
+
+    fun expandSummarizedUrl(titles: List<String>, urls: List<String>) {
+        val expandedUrl = mutableListOf<MutableList<String>>()
+        urls.forEach { url ->
+            expandedUrl.add(mutableListOf(url))
         }
+        this.titles = titles.toMutableList()
+        tabIndex = 0
+        urlHistory = expandedUrl
     }
 }
+
+private const val defaultTitle = "Google"
