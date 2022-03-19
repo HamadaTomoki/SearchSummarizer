@@ -65,3 +65,21 @@ fun SearchSummarizerTheme(
         )
     }
 }
+
+@Composable
+fun PreviewTheme(
+    useDarkTheme: Boolean = isSystemInDarkTheme(),
+    content: @Composable() () -> Unit
+) {
+    val colors = if (!useDarkTheme) {
+        LightThemeColors
+    } else {
+        DarkThemeColors
+    }
+
+    MaterialTheme(
+        colors = colors,
+        typography = PoncTypography,
+        content = content
+    )
+}

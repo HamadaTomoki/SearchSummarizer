@@ -6,8 +6,6 @@ import androidx.datastore.core.CorruptionException
 import androidx.datastore.core.Serializer
 import androidx.datastore.dataStore
 import com.searchSummarizer.data.model.BrowserHistory
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.withContext
 import kotlinx.serialization.ExperimentalSerializationApi
 import kotlinx.serialization.SerializationException
 import kotlinx.serialization.StringFormat
@@ -43,15 +41,12 @@ class BrowserHistorySerializer(
         }
     }
 
+    @Suppress("BlockingMethodInNonBlockingContext")
     override suspend fun writeTo(t: BrowserHistory, output: OutputStream) {
-        withContext(Dispatchers.IO) {
-            val string = stringFormat.encodeToString(t)
-            Log.i("datastore", "write $string")
-            val bytes = string.encodeToByteArray()
-            kotlin.runCatching {
-                output.write(bytes)
-                output.flush()
-            }
-        }
+        val string = stringFormat.encodeToString(t)
+        Log.i("datastore", "write $string")
+        val bytes = string.encodeToByteArray()
+        output.write(bytes)
+        output.flush()
     }
 }

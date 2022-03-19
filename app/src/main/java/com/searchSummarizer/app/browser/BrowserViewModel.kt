@@ -7,8 +7,6 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateListOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
-import androidx.lifecycle.DefaultLifecycleObserver
-import androidx.lifecycle.LifecycleOwner
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.searchSummarizer.data.enumType.Urls
@@ -16,14 +14,13 @@ import com.searchSummarizer.data.model.BrowserHistory
 import com.searchSummarizer.data.model.SummarizedUrl
 import com.searchSummarizer.data.repo.browser.BrowserRepository
 import com.searchSummarizer.data.repo.context.ContextRepository
-import kotlinx.coroutines.flow.collect
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.runBlocking
 
 class BrowserViewModel(
     private val browserRepository: BrowserRepository,
     contextRepository: ContextRepository,
-) : ViewModel(), DefaultLifecycleObserver {
+) : ViewModel() {
 
     var webView: WebView by mutableStateOf(WebView(contextRepository.createContext()))
     var tabIndex: Int by mutableStateOf(0)
@@ -34,11 +31,6 @@ class BrowserViewModel(
     var expanded: Boolean by mutableStateOf(true)
     var keyword: String by mutableStateOf("")
     var backEnabled: Boolean by mutableStateOf(false)
-
-    override fun onPause(owner: LifecycleOwner) {
-        super.onPause(owner)
-        saveBrowserHistory()
-    }
 
     fun onBack() {
         urlHistory[tabIndex].removeLast()
@@ -93,17 +85,15 @@ class BrowserViewModel(
         }
     }
 
-    private fun saveBrowserHistory() {
-        viewModelScope.launch {
-            browserRepository.saveBrowserHistory(
-                BrowserHistory(
-                    selectedTabIndex = tabIndex,
-                    titles = titles.joinToString(),
-                    urls = urlHistory.joinToString("^") // one dimensional array separator is "^"
-                    { it.joinToString(",") } // two dimensional array separator is ","
-                )
+    fun saveBrowserHistory() = runBlocking {
+        browserRepository.saveBrowserHistory(
+            BrowserHistory(
+                selectedTabIndex = tabIndex,
+                titles = titles.joinToString(),
+                urls = urlHistory.joinToString("^") // one dimensional array separator is "^"
+                { it.joinToString(",") } // two dimensional array separator is ","
             )
-        }
+        )
     }
 
     fun findSummarizedUrl(intent: Intent): SummarizedUrl? = runBlocking {
@@ -117,6 +107,7 @@ class BrowserViewModel(
             expandedUrl.add(mutableListOf(url))
         }
         this.titles = titles.toMutableList()
+        tabIndex = 0
         urlHistory = expandedUrl
     }
 }

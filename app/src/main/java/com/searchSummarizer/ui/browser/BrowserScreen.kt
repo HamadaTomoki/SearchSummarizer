@@ -8,12 +8,10 @@ import androidx.compose.material.MaterialTheme
 import androidx.compose.material.Surface
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import com.searchSummarizer.app.browser.BrowserViewModel
 import com.searchSummarizer.ui.components.BrowserBody
 import com.searchSummarizer.ui.components.BrowserHeader
-import com.searchSummarizer.ui.theme.SearchSummarizerTheme
 import org.koin.androidx.compose.getViewModel
 
 @OptIn(ExperimentalAnimationApi::class)
@@ -27,13 +25,5 @@ fun BrowseScreen(vm: BrowserViewModel = getViewModel()) {
             BrowserHeader()
             BrowserBody(vm.expanded)
         }
-    }
-}
-
-@Preview
-@Composable
-fun BrowseScreenPreview() {
-    SearchSummarizerTheme {
-        BrowseScreen()
     }
 }

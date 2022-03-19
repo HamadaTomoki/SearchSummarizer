@@ -12,7 +12,6 @@ import io.ktor.http.contentType
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.catch
 import java.io.IOException
-import kotlinx.coroutines.flow.flow
 
 class BrowserRepositoryImpl(
     private val browserHistoryStore: DataStore<BrowserHistory>

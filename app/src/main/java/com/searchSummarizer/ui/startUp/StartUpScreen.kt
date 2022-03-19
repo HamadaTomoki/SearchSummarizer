@@ -23,10 +23,13 @@ import androidx.compose.ui.graphics.Path
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
+import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavController
+import androidx.navigation.compose.rememberNavController
 import com.searchSummarizer.R
 import com.searchSummarizer.data.enumType.Screen
+import com.searchSummarizer.ui.theme.PreviewTheme
 
 @Composable
 fun StartUpScreen(
@@ -81,6 +84,24 @@ fun StartUpScreen(
                 )
             }
         }
+    }
+}
+
+@Preview
+@Composable
+fun StartUpScreenPreview() {
+    val navController = rememberNavController()
+    PreviewTheme {
+        StartUpScreen(navController = navController)
+    }
+}
+
+@Preview
+@Composable
+fun StartUpScreenDarkPreview() {
+    val navController = rememberNavController()
+    PreviewTheme(useDarkTheme = true) {
+        StartUpScreen(navController = navController)
     }
 }
 

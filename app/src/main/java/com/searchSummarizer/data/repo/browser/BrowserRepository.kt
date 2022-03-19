@@ -19,11 +19,13 @@ interface BrowserRepository {
     companion object {
         fun create(): HttpClient = HttpClient(Android) {
             install(JsonFeature) {
-                serializer = KotlinxSerializer(Json {
-                    prettyPrint = true
-                    isLenient = true
-                    ignoreUnknownKeys = true
-                })
+                serializer = KotlinxSerializer(
+                    Json {
+                        prettyPrint = true
+                        isLenient = true
+                        ignoreUnknownKeys = true
+                    }
+                )
             }
             engine {
                 connectTimeout = 60_000

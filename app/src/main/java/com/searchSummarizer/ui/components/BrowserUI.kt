@@ -26,6 +26,7 @@ import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.lazy.itemsIndexed
+import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.BasicTextField
 import androidx.compose.foundation.text.KeyboardActions
@@ -59,16 +60,18 @@ import androidx.compose.ui.platform.LocalSoftwareKeyboardController
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.input.KeyboardType
-import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
+import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
 import androidx.compose.ui.viewinterop.AndroidView
 import androidx.webkit.WebSettingsCompat
 import androidx.webkit.WebViewFeature
 import com.searchSummarizer.R
 import com.searchSummarizer.app.browser.BrowserViewModel
+import com.searchSummarizer.app.browser.BrowserWebViewClient
 import com.searchSummarizer.data.enumType.Urls
-import com.searchSummarizer.ui.browser.BrowserWebViewClient
+import com.searchSummarizer.ui.theme.PreviewTheme
 import org.koin.androidx.compose.getViewModel
 
 /** Header -------------------------------------------------- */
@@ -305,7 +308,7 @@ private fun BrowserWebView(
             it.settings.displayZoomControls = false
         }
     }, update = {
-    }, modifier = modifier)
+        }, modifier = modifier)
 
     BackHandler(
         enabled = vm.backEnabled,
@@ -316,7 +319,11 @@ private fun BrowserWebView(
 @OptIn(ExperimentalAnimationApi::class)
 @Composable
 private fun ExpandedView(vm: BrowserViewModel = getViewModel()) {
-    val webView = vm.webView
+
+    val titles = vm.titles
+    val urls = vm.urlHistory
+    val tabIndex = vm.tabIndex
+
     AnimatedVisibility(
         visible = !vm.expanded,
         enter = fadeIn(),
@@ -327,8 +334,8 @@ private fun ExpandedView(vm: BrowserViewModel = getViewModel()) {
         ) {
             Column {
                 CurrentTab(
-                    title = webView.title.toString(),
-                    url = webView.url.toString()
+                    title = titles[tabIndex],
+                    url = urls[tabIndex].last()
                 )
                 Divider()
                 Row(
@@ -337,7 +344,7 @@ private fun ExpandedView(vm: BrowserViewModel = getViewModel()) {
                     UrlTabRow(
                         modifier = Modifier.weight(1f),
                         onTabClick = vm::onSwitchTab,
-                        titles = vm.titles,
+                        titles = titles,
                         urls = vm.urlHistory.map { it.last() }
                     )
                     Spacer(Modifier.padding(4.dp))
@@ -418,6 +425,7 @@ fun UrlTabRow(
                 horizontalAlignment = Alignment.CenterHorizontally,
                 modifier = Modifier
                     .padding(end = 16.dp)
+                    .width(60.dp)
                     .clickable { onTabClick(index) }
             ) {
                 Favicon(
@@ -425,7 +433,7 @@ fun UrlTabRow(
                     Modifier
                         .size(50.dp)
                         .background(
-                            shape = RoundedCornerShape(114.dp),
+                            shape = CircleShape,
                             color = MaterialTheme.colors.primary.copy(alpha = 0.1f)
                         )
                         .padding(12.dp)
@@ -433,12 +441,27 @@ fun UrlTabRow(
                 Text(
                     text = titles[index],
                     overflow = TextOverflow.Ellipsis,
-                    maxLines = 1,
-                    style = MaterialTheme.typography.overline,
-                    textAlign = TextAlign.Center,
-                    modifier = Modifier.width(60.dp)
+                    maxLines = 2,
+                    style = MaterialTheme.typography.overline.copy(lineHeight = 10.sp)
                 )
             }
+        }
+    }
+}
+
+@Preview
+@Composable
+fun UrlTabRowPreview() {
+    PreviewTheme {
+        Row(
+            modifier = Modifier.padding(vertical = 12.dp, horizontal = 16.dp),
+        ) {
+            UrlTabRow(
+                modifier = Modifier.weight(1f),
+                onTabClick = {},
+                titles = listOf("YourRipositoryies", "Docker"),
+                urls = listOf("https://github.com/", "https://www.docker.com/")
+            )
         }
     }
 }

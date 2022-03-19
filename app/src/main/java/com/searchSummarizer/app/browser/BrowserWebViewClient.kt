@@ -1,4 +1,4 @@
-package com.searchSummarizer.ui.browser
+package com.searchSummarizer.app.browser
 
 import android.graphics.Bitmap
 import android.os.Build
@@ -7,7 +7,6 @@ import android.webkit.WebResourceRequest
 import android.webkit.WebView
 import android.webkit.WebViewClient
 import androidx.annotation.RequiresApi
-import com.searchSummarizer.app.browser.BrowserViewModel
 
 class BrowserWebViewClient(
     private val vm: BrowserViewModel
