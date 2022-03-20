@@ -8,8 +8,10 @@ import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.ExperimentalAnimationApi
 import androidx.compose.animation.fadeIn
 import androidx.compose.animation.fadeOut
+import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
+import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.isSystemInDarkTheme
@@ -24,7 +26,6 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyRow
-import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.lazy.itemsIndexed
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
@@ -105,7 +106,8 @@ fun BrowserHeader(vm: BrowserViewModel = getViewModel()) {
             modifier = Modifier.weight(1f),
             onSearchTabClick = vm::onTabClick,
             extended = extended,
-            favIconUrls = favIconUrls
+            favIconUrls = favIconUrls,
+            tabIndex = vm.tabIndex
         )
         Spacer(Modifier.padding(6.dp))
         TabManagerIcon(extended)
@@ -171,6 +173,7 @@ private fun SearchTab(
     onSearchTabClick: () -> Unit,
     extended: Boolean,
     favIconUrls: List<String>,
+    tabIndex: Int,
 ) {
     val interactionSource = remember { MutableInteractionSource() }
     Surface(
@@ -184,11 +187,11 @@ private fun SearchTab(
         Row(
             modifier = modifier.padding(
                 horizontal = 12.dp,
-                vertical = 8.dp
+                vertical = 6.dp
             )
         ) {
             AnimatedVisibility(visible = extended) {
-                SearchTabContent(favIconUrls, modifier.weight(1f))
+                SearchTabContent(favIconUrls, tabIndex)
             }
             AnimatedVisibility(visible = !extended) {
                 SearchTextField()
@@ -200,14 +203,25 @@ private fun SearchTab(
 @Composable
 private fun SearchTabContent(
     favIconUrls: List<String>,
-    modifier: Modifier = Modifier,
+    tabIndex: Int,
 ) {
-    LazyRow(modifier) {
-        items(favIconUrls) { url ->
+    LazyRow(Modifier.fillMaxSize()) {
+        itemsIndexed(favIconUrls) { index, url ->
+            val selectedTabModifier = if (index == tabIndex) {
+                Modifier
+                    .border(
+                        border = BorderStroke(2.dp, SolidColor(MaterialTheme.colors.primary)),
+                        shape = CircleShape
+                    )
+                    .padding(4.dp)
+            } else {
+                Modifier
+            }
             Favicon(
                 url = url,
-                modifier.size(32.dp)
+                modifier = selectedTabModifier
             )
+            Spacer(Modifier.padding(4.dp))
         }
     }
 }
@@ -228,7 +242,7 @@ fun SearchTextField(
             contentDescription = null,
             modifier = modifier
                 .background(
-                    shape = RoundedCornerShape(50.dp),
+                    shape = CircleShape,
                     color = MaterialTheme.colors.primary.copy(alpha = 0.3f)
                 )
                 .padding(4.dp)
@@ -345,7 +359,8 @@ private fun ExpandedView(vm: BrowserViewModel = getViewModel()) {
                         modifier = Modifier.weight(1f),
                         onTabClick = vm::onSwitchTab,
                         titles = titles,
-                        urls = vm.urlHistory.map { it.last() }
+                        urls = vm.urlHistory.map { it.last() },
+                        tabIndex = vm.tabIndex
                     )
                     Spacer(Modifier.padding(4.dp))
                     TabPlusIcon(vm::onAddTab)
@@ -417,10 +432,19 @@ fun UrlTabRow(
     modifier: Modifier = Modifier,
     onTabClick: (Int) -> Unit,
     titles: List<String>,
-    urls: List<String>
+    urls: List<String>,
+    tabIndex: Int
 ) {
     LazyRow(modifier) {
         itemsIndexed(urls) { index, urlHistory ->
+            val selectedTabModifier = if (index == tabIndex) {
+                Modifier.border(
+                    border = BorderStroke(2.dp, SolidColor(MaterialTheme.colors.primary)),
+                    shape = CircleShape
+                )
+            } else {
+                Modifier
+            }
             Column(
                 horizontalAlignment = Alignment.CenterHorizontally,
                 modifier = Modifier
@@ -430,7 +454,7 @@ fun UrlTabRow(
             ) {
                 Favicon(
                     url = Urls.GoogleFavicon(urlHistory).url,
-                    Modifier
+                    modifier = selectedTabModifier
                         .size(50.dp)
                         .background(
                             shape = CircleShape,
@@ -460,7 +484,8 @@ fun UrlTabRowPreview() {
                 modifier = Modifier.weight(1f),
                 onTabClick = {},
                 titles = listOf("YourRipositoryies", "Docker"),
-                urls = listOf("https://github.com/", "https://www.docker.com/")
+                urls = listOf("https://github.com/", "https://www.docker.com/"),
+                tabIndex = 0
             )
         }
     }

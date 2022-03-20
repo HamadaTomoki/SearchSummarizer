@@ -55,7 +55,7 @@ class BrowserViewModel(
 
     fun onAddTab() {
         urlHistory.add(mutableListOf(Urls.Default.url))
-        tabIndex++
+        tabIndex = urlHistory.size - 1
         titles.add(defaultTitle)
         webView.loadUrl(Urls.Default.url)
         expanded = !expanded
