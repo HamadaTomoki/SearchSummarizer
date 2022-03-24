@@ -51,6 +51,7 @@ import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.ExperimentalComposeUiApi
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.composed
 import androidx.compose.ui.draw.drawBehind
 import androidx.compose.ui.focus.FocusRequester
 import androidx.compose.ui.focus.focusRequester
@@ -111,7 +112,7 @@ fun BrowserHeader(vm: BrowserViewModel = getViewModel()) {
         )
         Spacer(Modifier.padding(6.dp))
         TabManagerIcon(extended)
-        MoreOptionIcon()
+        MoreOptionIcon(vm)
     }
 }
 
@@ -129,10 +130,7 @@ private fun AppIcon(extended: Boolean) {
 
 @ExperimentalAnimationApi
 @Composable
-private fun TabManagerIcon(
-    extended: Boolean,
-    modifier: Modifier = Modifier
-) {
+private fun TabManagerIcon(extended: Boolean) {
     val interactionSource = remember { MutableInteractionSource() }
     AnimatedVisibility(visible = extended) {
         Row {
@@ -140,7 +138,7 @@ private fun TabManagerIcon(
                 imageVector = Icons.Filled.Tab,
                 contentDescription = null,
                 tint = MaterialTheme.colors.onSurface,
-                modifier = modifier
+                modifier = Modifier
                     .clickable(
                         interactionSource = interactionSource,
                         indication = null
@@ -152,18 +150,21 @@ private fun TabManagerIcon(
 }
 
 @Composable
-private fun MoreOptionIcon() {
+private fun MoreOptionIcon(vm: BrowserViewModel) {
     val interactionSource = remember { MutableInteractionSource() }
-    Icon(
-        imageVector = Icons.Filled.MoreVert,
-        contentDescription = null,
-        tint = MaterialTheme.colors.onSurface,
-        modifier = Modifier
-            .clickable(
-                interactionSource = interactionSource,
-                indication = null
-            ) {}
-    )
+    Box {
+        Icon(
+            imageVector = Icons.Filled.MoreVert,
+            contentDescription = null,
+            tint = MaterialTheme.colors.onSurface,
+            modifier = Modifier
+                .clickable(
+                    interactionSource = interactionSource,
+                    indication = null
+                ) { vm.onMenuDismissRequest() }
+        )
+        BrowserOptionMenu(vm)
+    }
 }
 
 @ExperimentalAnimationApi
@@ -207,19 +208,15 @@ private fun SearchTabContent(
 ) {
     LazyRow(Modifier.fillMaxSize()) {
         itemsIndexed(favIconUrls) { index, url ->
-            val selectedTabModifier = if (index == tabIndex) {
-                Modifier
-                    .border(
-                        border = BorderStroke(2.dp, SolidColor(MaterialTheme.colors.primary)),
-                        shape = CircleShape
-                    )
-                    .padding(4.dp)
-            } else {
-                Modifier
-            }
             Favicon(
                 url = url,
-                modifier = selectedTabModifier
+                modifier = Modifier
+                    .size(28.dp)
+                    .selectedTabIndex(
+                        tabIndex = tabIndex,
+                        seqIndex = index
+                    )
+                    .padding(4.dp)
             )
             Spacer(Modifier.padding(4.dp))
         }
@@ -286,9 +283,9 @@ fun SearchTextField(
 /** Body -------------------------------------------------- */
 @OptIn(ExperimentalAnimationApi::class, ExperimentalComposeUiApi::class)
 @Composable
-fun BrowserBody(extended: Boolean) {
-    Box {
-        if (extended) BrowserWebView(Modifier.fillMaxSize())
+fun BrowserBody(expanded: Boolean) {
+    Box(contentAlignment = Alignment.TopEnd) {
+        if (expanded) BrowserWebView()
         ExpandedView()
     }
 }
@@ -297,7 +294,6 @@ fun BrowserBody(extended: Boolean) {
 @SuppressLint("SetJavaScriptEnabled")
 @Composable
 private fun BrowserWebView(
-    modifier: Modifier = Modifier,
     vm: BrowserViewModel = getViewModel(),
     useDarkTheme: Boolean = isSystemInDarkTheme(),
 ) {
@@ -322,7 +318,7 @@ private fun BrowserWebView(
             it.settings.displayZoomControls = false
         }
     }, update = {
-        }, modifier = modifier)
+    })
 
     BackHandler(
         enabled = vm.backEnabled,
@@ -435,26 +431,26 @@ fun UrlTabRow(
     urls: List<String>,
     tabIndex: Int
 ) {
+    val interactionSource = remember { MutableInteractionSource() }
     LazyRow(modifier) {
         itemsIndexed(urls) { index, urlHistory ->
-            val selectedTabModifier = if (index == tabIndex) {
-                Modifier.border(
-                    border = BorderStroke(2.dp, SolidColor(MaterialTheme.colors.primary)),
-                    shape = CircleShape
-                )
-            } else {
-                Modifier
-            }
             Column(
                 horizontalAlignment = Alignment.CenterHorizontally,
                 modifier = Modifier
                     .padding(end = 16.dp)
                     .width(60.dp)
-                    .clickable { onTabClick(index) }
+                    .clickable(
+                        interactionSource = interactionSource,
+                        indication = null
+                    ) { onTabClick(index) }
             ) {
                 Favicon(
                     url = Urls.GoogleFavicon(urlHistory).url,
-                    modifier = selectedTabModifier
+                    modifier = Modifier
+                        .selectedTabIndex(
+                            tabIndex = tabIndex,
+                            seqIndex = index
+                        )
                         .size(50.dp)
                         .background(
                             shape = CircleShape,
@@ -507,3 +503,20 @@ fun TabPlusIcon(onSearchTabClick: () -> Unit) {
         )
     }
 }
+
+
+/** Modifier */
+fun Modifier.selectedTabIndex(tabIndex: Int, seqIndex: Int) = composed {
+    this.then(
+        if (seqIndex == tabIndex) {
+            Modifier
+                .border(
+                    border = BorderStroke(2.dp, SolidColor(MaterialTheme.colors.primary)),
+                    shape = CircleShape
+                )
+        } else {
+            Modifier
+        }
+    )
+}
+

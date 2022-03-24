@@ -16,6 +16,7 @@ import com.searchSummarizer.data.repo.browser.BrowserRepository
 import com.searchSummarizer.data.repo.context.ContextRepository
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.runBlocking
+import kotlin.math.exp
 
 class BrowserViewModel(
     private val browserRepository: BrowserRepository,
@@ -27,10 +28,20 @@ class BrowserViewModel(
     var urlHistory: MutableList<MutableList<String>> =
         mutableStateListOf(mutableStateListOf(Urls.Default.url))
     var titles: MutableList<String> = mutableStateListOf(defaultTitle)
-
     var expanded: Boolean by mutableStateOf(true)
+    var menuExpanded: Boolean by mutableStateOf(false)
     var keyword: String by mutableStateOf("")
     var backEnabled: Boolean by mutableStateOf(false)
+
+    fun onDismissTabAll() {
+        tabIndex = 0
+        webView.loadUrl(Urls.Default.url)
+        urlHistory = mutableStateListOf(mutableStateListOf(Urls.Default.url))
+    }
+
+    fun onMenuDismissRequest() {
+        menuExpanded = !menuExpanded
+    }
 
     fun onBack() {
         urlHistory[tabIndex].removeLast()
