@@ -1,16 +1,9 @@
 package com.searchSummarizer.ui.components
 
-import androidx.compose.foundation.layout.Box
-import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.IntrinsicSize
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
-import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.width
-import androidx.compose.foundation.layout.wrapContentSize
-import androidx.compose.foundation.layout.wrapContentWidth
 import androidx.compose.material.DropdownMenu
 import androidx.compose.material.DropdownMenuItem
 import androidx.compose.material.Icon
@@ -39,20 +32,25 @@ import com.searchSummarizer.app.browser.BrowserViewModel
 import com.searchSummarizer.data.model.BrowserOption
 import com.searchSummarizer.ui.theme.PreviewTheme
 
+/**
+ * browserのoption menu
+ *
+ * @param vm
+ */
 @Composable
 fun BrowserOptionMenu(vm: BrowserViewModel) {
 
     val browserOptions = listOf(
-        BrowserOption("新しいタブ", Icons.Filled.AddBox, {}),
+        BrowserOption("新しいタブ", Icons.Filled.AddBox) {},
         BrowserOption("全てのタブを閉じる", Icons.Filled.Close, vm::onDismissTabAll),
-        BrowserOption("履歴", Icons.Filled.History, {}),
-        BrowserOption("ダウンロード", Icons.Filled.FileDownloadDone, {}),
-        BrowserOption("ブックマーク", Icons.Filled.Star, {}),
-        BrowserOption("最近使ったタブ", Icons.Filled.GTranslate, {}),
-        BrowserOption("共有", Icons.Filled.Share, {}),
-        BrowserOption("ホーム画面に追加", Icons.Filled.AddToHomeScreen, {}),
-        BrowserOption("設定", Icons.Filled.Settings, {}),
-        BrowserOption("ヘルプとフィード・バック", Icons.Filled.Help, {}),
+        BrowserOption("履歴", Icons.Filled.History) {},
+        BrowserOption("ダウンロード", Icons.Filled.FileDownloadDone) {},
+        BrowserOption("ブックマーク", Icons.Filled.Star) {},
+        BrowserOption("最近使ったタブ", Icons.Filled.GTranslate) {},
+        BrowserOption("共有", Icons.Filled.Share) {},
+        BrowserOption("ホーム画面に追加", Icons.Filled.AddToHomeScreen) {},
+        BrowserOption("設定", Icons.Filled.Settings) {},
+        BrowserOption("ヘルプとフィード・バック", Icons.Filled.Help) {},
     )
 
     DropdownMenu(
@@ -60,7 +58,7 @@ fun BrowserOptionMenu(vm: BrowserViewModel) {
         offset = DpOffset((-1).dp, 20.dp),
         onDismissRequest = vm::onMenuDismissRequest,
     ) {
-        browserOptions.forEachIndexed { index, browserOption ->
+        browserOptions.forEach { browserOption ->
             BrowserOptionMenuItem(
                 optionName = browserOption.name,
                 icon = browserOption.icon,
@@ -73,6 +71,14 @@ fun BrowserOptionMenu(vm: BrowserViewModel) {
     }
 }
 
+/**
+ * browserのoption menu item
+ *
+ * @param icon optionのicon
+ * @param optionName option名
+ * @param onClick optionのclick event
+ * @receiver
+ */
 @Composable
 private fun BrowserOptionMenuItem(
     icon: ImageVector,
@@ -99,7 +105,6 @@ private fun BrowserOptionMenuItem(
 @Composable
 fun BrowserOptionMenuPreview() {
     PreviewTheme {
-        BrowserOptionMenuItem(Icons.Filled.Share, "共有", {})
+        BrowserOptionMenuItem(Icons.Filled.Share, "共有") {}
     }
 }
-

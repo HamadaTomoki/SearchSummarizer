@@ -31,6 +31,11 @@ import com.searchSummarizer.R
 import com.searchSummarizer.data.enumType.Screen
 import com.searchSummarizer.ui.theme.PreviewTheme
 
+/**
+ * StartUp画面
+ *
+ * @param navController
+ */
 @Composable
 fun StartUpScreen(
     navController: NavController
@@ -105,6 +110,11 @@ fun StartUpScreenDarkPreview() {
     }
 }
 
+/**
+ * StartUp画面背景のcanvas
+ *
+ * @param color
+ */
 @Composable
 fun StartUpCanvas(
     color: Color
