@@ -1,6 +1,5 @@
 package com.searchSummarizer.ui.components
 
-import android.util.Log
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -35,6 +34,12 @@ import com.searchSummarizer.app.browser.BrowserViewModel
 import com.searchSummarizer.data.model.SummarizedUrl
 import com.searchSummarizer.ui.theme.PreviewTheme
 
+/**
+ * 共有Url受け取り時のに表示されるalert dialog
+ *
+ * @param summarizedUrl SummarizedUrl
+ * @param vm BrowserViewModel
+ */
 @Composable
 fun UrlSharingDialog(
     summarizedUrl: SummarizedUrl,
@@ -43,7 +48,6 @@ fun UrlSharingDialog(
 
     var openDialog: Boolean by remember { mutableStateOf(true) }
 
-    Log.i("hoge", summarizedUrl.toString())
     val close = { openDialog = false }
     val submit = {
         vm.expandSummarizedUrl(summarizedUrl.titles, summarizedUrl.urls)
@@ -60,6 +64,15 @@ fun UrlSharingDialog(
     }
 }
 
+/**
+ * Url sharing dialog content
+ *
+ * @param summarizedUrl SummarizedUrl
+ * @param submit SummarizeUrlを展開するevent
+ * @param close dialogを閉じるevent
+ * @receiver Unit
+ * @receiver Unit
+ */
 @Composable
 private fun UrlSharingDialogContent(
     summarizedUrl: SummarizedUrl,

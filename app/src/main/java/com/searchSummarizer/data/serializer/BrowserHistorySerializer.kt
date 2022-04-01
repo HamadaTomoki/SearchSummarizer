@@ -15,11 +15,20 @@ import kotlinx.serialization.json.Json
 import java.io.InputStream
 import java.io.OutputStream
 
+/**
+ * browser履歴のdata store
+ */
 val Context.dataStore by dataStore(
     fileName = "web_history.json",
     serializer = BrowserHistorySerializer()
 )
 
+/**
+ * browser履歴のserializer
+ *
+ * @property stringFormat Jsonのformat形式
+ * @constructor BrowserHistorySerializerを作製します。
+ */
 @OptIn(ExperimentalSerializationApi::class)
 class BrowserHistorySerializer(
     private val stringFormat: StringFormat = Json {

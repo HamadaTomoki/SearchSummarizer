@@ -14,6 +14,11 @@ import com.searchSummarizer.ui.components.BrowserBody
 import com.searchSummarizer.ui.components.BrowserHeader
 import org.koin.androidx.compose.getViewModel
 
+/**
+ * Browser画面
+ *
+ * @param vm BrowserViewModel
+ */
 @OptIn(ExperimentalAnimationApi::class)
 @Composable
 fun BrowseScreen(vm: BrowserViewModel = getViewModel()) {

@@ -8,8 +8,10 @@ import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.ExperimentalAnimationApi
 import androidx.compose.animation.fadeIn
 import androidx.compose.animation.fadeOut
+import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
+import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.isSystemInDarkTheme
@@ -24,13 +26,9 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyRow
-import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.lazy.itemsIndexed
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.foundation.text.BasicTextField
-import androidx.compose.foundation.text.KeyboardActions
-import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material.Divider
 import androidx.compose.material.Icon
 import androidx.compose.material.IconButton
@@ -45,21 +43,16 @@ import androidx.compose.material.icons.filled.MoreVert
 import androidx.compose.material.icons.filled.Share
 import androidx.compose.material.icons.filled.Tab
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.SideEffect
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.ExperimentalComposeUiApi
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.composed
 import androidx.compose.ui.draw.drawBehind
-import androidx.compose.ui.focus.FocusRequester
-import androidx.compose.ui.focus.focusRequester
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.SolidColor
-import androidx.compose.ui.platform.LocalSoftwareKeyboardController
 import androidx.compose.ui.res.painterResource
-import androidx.compose.ui.text.input.ImeAction
-import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
@@ -75,6 +68,12 @@ import com.searchSummarizer.ui.theme.PreviewTheme
 import org.koin.androidx.compose.getViewModel
 
 /** Header -------------------------------------------------- */
+
+/**
+ * Browser画面のheader
+ *
+ * @param vm BrowserViewModel
+ */
 @OptIn(ExperimentalAnimationApi::class)
 @Composable
 fun BrowserHeader(vm: BrowserViewModel = getViewModel()) {
@@ -105,14 +104,20 @@ fun BrowserHeader(vm: BrowserViewModel = getViewModel()) {
             modifier = Modifier.weight(1f),
             onSearchTabClick = vm::onTabClick,
             extended = extended,
-            favIconUrls = favIconUrls
+            favIconUrls = favIconUrls,
+            tabIndex = vm.tabIndex
         )
         Spacer(Modifier.padding(6.dp))
         TabManagerIcon(extended)
-        MoreOptionIcon()
+        MoreOptionIcon(vm)
     }
 }
 
+/**
+ * App icon
+ *
+ * @param extended visible
+ */
 @ExperimentalAnimationApi
 @Composable
 private fun AppIcon(extended: Boolean) {
@@ -125,12 +130,14 @@ private fun AppIcon(extended: Boolean) {
     }
 }
 
+/**
+ * Tab管理 icon
+ *
+ * @param extended visible
+ */
 @ExperimentalAnimationApi
 @Composable
-private fun TabManagerIcon(
-    extended: Boolean,
-    modifier: Modifier = Modifier
-) {
+private fun TabManagerIcon(extended: Boolean) {
     val interactionSource = remember { MutableInteractionSource() }
     AnimatedVisibility(visible = extended) {
         Row {
@@ -138,7 +145,7 @@ private fun TabManagerIcon(
                 imageVector = Icons.Filled.Tab,
                 contentDescription = null,
                 tint = MaterialTheme.colors.onSurface,
-                modifier = modifier
+                modifier = Modifier
                     .clickable(
                         interactionSource = interactionSource,
                         indication = null
@@ -149,21 +156,39 @@ private fun TabManagerIcon(
     }
 }
 
+/**
+ * More option icon
+ *
+ * @param vm BrowserViewModel
+ */
 @Composable
-private fun MoreOptionIcon() {
+private fun MoreOptionIcon(vm: BrowserViewModel) {
     val interactionSource = remember { MutableInteractionSource() }
-    Icon(
-        imageVector = Icons.Filled.MoreVert,
-        contentDescription = null,
-        tint = MaterialTheme.colors.onSurface,
-        modifier = Modifier
-            .clickable(
-                interactionSource = interactionSource,
-                indication = null
-            ) {}
-    )
+    Box {
+        Icon(
+            imageVector = Icons.Filled.MoreVert,
+            contentDescription = null,
+            tint = MaterialTheme.colors.onSurface,
+            modifier = Modifier
+                .clickable(
+                    interactionSource = interactionSource,
+                    indication = null
+                ) { vm.onMenuDismissRequest() }
+        )
+        BrowserOptionMenu(vm)
+    }
 }
 
+/**
+ * 検索tab
+ *
+ * @param modifier modifier Modifier
+ * @param onSearchTabClick 検索tabのclick event
+ * @param extended visible
+ * @param favIconUrls 検索tabのfaviconのlist
+ * @param tabIndex 現在閲覧中のtabのindex
+ * @receiver Unit
+ */
 @ExperimentalAnimationApi
 @Composable
 private fun SearchTab(
@@ -171,6 +196,7 @@ private fun SearchTab(
     onSearchTabClick: () -> Unit,
     extended: Boolean,
     favIconUrls: List<String>,
+    tabIndex: Int,
 ) {
     val interactionSource = remember { MutableInteractionSource() }
     Surface(
@@ -184,11 +210,11 @@ private fun SearchTab(
         Row(
             modifier = modifier.padding(
                 horizontal = 12.dp,
-                vertical = 8.dp
+                vertical = 6.dp
             )
         ) {
             AnimatedVisibility(visible = extended) {
-                SearchTabContent(favIconUrls, modifier.weight(1f))
+                SearchTabContent(favIconUrls, tabIndex)
             }
             AnimatedVisibility(visible = !extended) {
                 SearchTextField()
@@ -197,93 +223,58 @@ private fun SearchTab(
     }
 }
 
+/**
+ * 検索tab content
+ *
+ * @param favIconUrls 検索tabのfaviconのlist
+ * @param tabIndex 現在閲覧中のtabのindex
+ */
 @Composable
 private fun SearchTabContent(
     favIconUrls: List<String>,
-    modifier: Modifier = Modifier,
+    tabIndex: Int,
 ) {
-    LazyRow(modifier) {
-        items(favIconUrls) { url ->
+    LazyRow(Modifier.fillMaxSize()) {
+        itemsIndexed(favIconUrls) { index, url ->
             Favicon(
                 url = url,
-                modifier.size(32.dp)
+                modifier = Modifier
+                    .size(28.dp)
+                    .selectedTabIndex(tabIndex == index)
+                    .padding(4.dp)
             )
-        }
-    }
-}
-
-@OptIn(ExperimentalComposeUiApi::class)
-@Composable
-fun SearchTextField(
-    modifier: Modifier = Modifier,
-    vm: BrowserViewModel = getViewModel()
-) {
-
-    val value = vm.keyword
-    val onValueChange: (String) -> Unit = { vm.keyword = it }
-
-    Row {
-        Image(
-            painter = painterResource(id = R.drawable.ic_search_summarizer),
-            contentDescription = null,
-            modifier = modifier
-                .background(
-                    shape = RoundedCornerShape(50.dp),
-                    color = MaterialTheme.colors.primary.copy(alpha = 0.3f)
-                )
-                .padding(4.dp)
-        )
-        Spacer(modifier.padding(4.dp))
-        Box(contentAlignment = Alignment.CenterStart) {
-            val keyboardController = LocalSoftwareKeyboardController.current
-            val requester = FocusRequester()
-            BasicTextField(
-                value = value,
-                onValueChange = onValueChange,
-                keyboardOptions = KeyboardOptions.Default.copy(
-                    imeAction = ImeAction.Search,
-                    keyboardType = KeyboardType.Uri
-                ),
-                keyboardActions = KeyboardActions(
-                    onSearch = {
-                        vm.onSearch()
-                        keyboardController?.hide()
-                    }
-                ),
-                textStyle = MaterialTheme.typography.body1.copy(color = MaterialTheme.colors.onSurface),
-                singleLine = true,
-                cursorBrush = SolidColor(MaterialTheme.colors.onSurface),
-                modifier = modifier.focusRequester(requester)
-            )
-            SideEffect {
-                requester.requestFocus()
-            }
-            if (value.isEmpty()) {
-                Text(
-                    text = "検索語句またはウェブアドレスを入力",
-                    color = Color.Gray,
-                    fontSize = MaterialTheme.typography.body1.fontSize
-                )
-            }
+            Spacer(Modifier.padding(4.dp))
         }
     }
 }
 
 /** Body -------------------------------------------------- */
+
+/**
+ * Browser画面のbody
+ *
+ * @param expanded visible
+ */
 @OptIn(ExperimentalAnimationApi::class, ExperimentalComposeUiApi::class)
 @Composable
-fun BrowserBody(extended: Boolean) {
-    Box {
-        if (extended) BrowserWebView(Modifier.fillMaxSize())
+fun BrowserBody(expanded: Boolean) {
+    Box(contentAlignment = Alignment.TopEnd) {
+        if (expanded) BrowserWebView()
         ExpandedView()
     }
 }
 
 /** Body main components -------------------------------------------------- */
+
+/**
+ * Browser画面のWebView
+ *
+ * @param vm BrowserViewModel
+ * @param useDarkTheme theme mode
+ */
 @SuppressLint("SetJavaScriptEnabled")
 @Composable
 private fun BrowserWebView(
-    modifier: Modifier = Modifier,
     vm: BrowserViewModel = getViewModel(),
     useDarkTheme: Boolean = isSystemInDarkTheme(),
 ) {
@@ -308,7 +299,7 @@ private fun BrowserWebView(
             it.settings.displayZoomControls = false
         }
     }, update = {
-        }, modifier = modifier)
+        })
 
     BackHandler(
         enabled = vm.backEnabled,
@@ -316,6 +307,11 @@ private fun BrowserWebView(
     )
 }
 
+/**
+ * 検索modeのView
+ *
+ * @param vm BrowserViewModel
+ */
 @OptIn(ExperimentalAnimationApi::class)
 @Composable
 private fun ExpandedView(vm: BrowserViewModel = getViewModel()) {
@@ -345,7 +341,8 @@ private fun ExpandedView(vm: BrowserViewModel = getViewModel()) {
                         modifier = Modifier.weight(1f),
                         onTabClick = vm::onSwitchTab,
                         titles = titles,
-                        urls = vm.urlHistory.map { it.last() }
+                        urls = vm.urlHistory.map { it.last() },
+                        tabIndex = vm.tabIndex
                     )
                     Spacer(Modifier.padding(4.dp))
                     TabPlusIcon(vm::onAddTab)
@@ -362,6 +359,13 @@ private fun ExpandedView(vm: BrowserViewModel = getViewModel()) {
 }
 
 /** Body sub components ----------------------------------------------- */
+
+/**
+ * 現在閲覧中tab
+ *
+ * @param title webpageのtittle
+ * @param url webpageのurl
+ */
 @Composable
 fun CurrentTab(
     title: String,
@@ -412,13 +416,26 @@ fun CurrentTab(
     }
 }
 
+/**
+ * Url tab row
+ *
+ * @param modifier modifier Modifier
+ * @param onTabClick webpage切り替えtabのclick event
+ * @param titles webpageのtittle list
+ * @param urls webpageのurl list
+ * @param tabIndex 現在閲覧中のtabのindex
+ * @receiver 切り替えるtabのindex
+ */
+
 @Composable
 fun UrlTabRow(
     modifier: Modifier = Modifier,
     onTabClick: (Int) -> Unit,
     titles: List<String>,
-    urls: List<String>
+    urls: List<String>,
+    tabIndex: Int
 ) {
+    val interactionSource = remember { MutableInteractionSource() }
     LazyRow(modifier) {
         itemsIndexed(urls) { index, urlHistory ->
             Column(
@@ -426,11 +443,15 @@ fun UrlTabRow(
                 modifier = Modifier
                     .padding(end = 16.dp)
                     .width(60.dp)
-                    .clickable { onTabClick(index) }
+                    .clickable(
+                        interactionSource = interactionSource,
+                        indication = null
+                    ) { onTabClick(index) }
             ) {
                 Favicon(
                     url = Urls.GoogleFavicon(urlHistory).url,
-                    Modifier
+                    modifier = Modifier
+                        .selectedTabIndex(tabIndex == index)
                         .size(50.dp)
                         .background(
                             shape = CircleShape,
@@ -459,13 +480,20 @@ fun UrlTabRowPreview() {
             UrlTabRow(
                 modifier = Modifier.weight(1f),
                 onTabClick = {},
-                titles = listOf("YourRipositoryies", "Docker"),
-                urls = listOf("https://github.com/", "https://www.docker.com/")
+                titles = listOf("YourRepositories", "Docker"),
+                urls = listOf("https://github.com/", "https://www.docker.com/"),
+                tabIndex = 0
             )
         }
     }
 }
 
+/**
+ * Tab追加 Icon
+ *
+ * @param onSearchTabClick 検索tabのclick event
+ * @receiver Unit
+ */
 @Composable
 fun TabPlusIcon(onSearchTabClick: () -> Unit) {
     IconButton(onClick = onSearchTabClick) {
@@ -481,4 +509,25 @@ fun TabPlusIcon(onSearchTabClick: () -> Unit) {
                 .padding(12.dp)
         )
     }
+}
+
+/** Modifier */
+
+/**
+ * 選択されたtabのmodifier
+ *
+ * @param selected tabが選択されているか
+ */
+fun Modifier.selectedTabIndex(selected: Boolean) = composed {
+    this.then(
+        if (selected) {
+            Modifier
+                .border(
+                    border = BorderStroke(2.dp, SolidColor(MaterialTheme.colors.primary)),
+                    shape = CircleShape
+                )
+        } else {
+            Modifier
+        }
+    )
 }

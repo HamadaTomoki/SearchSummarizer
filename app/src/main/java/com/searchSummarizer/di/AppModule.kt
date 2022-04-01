@@ -6,6 +6,9 @@ import com.searchSummarizer.data.serializer.dataStore
 import org.koin.android.ext.koin.androidContext
 import org.koin.dsl.module
 
+/**
+ * SearchSummarizerAppのdi module
+ */
 val searchSummarizerAppModule = module {
     factory { ContextRepositoryImpl(androidContext()) }
     factory { BrowserRepositoryImpl(androidContext().dataStore) }

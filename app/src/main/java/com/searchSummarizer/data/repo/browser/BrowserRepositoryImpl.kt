@@ -13,17 +13,23 @@ import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.catch
 import java.io.IOException
 
+/**
+ * BrowserRepositoryの実装
+ *
+ * @property browserHistoryStore browser履歴のdata store
+ * @constructor BrowserRepositoryImplを作成します。
+ */
 class BrowserRepositoryImpl(
     private val browserHistoryStore: DataStore<BrowserHistory>
 ) : BrowserRepository {
 
-    private val TAG: String = "BrowserRepo"
+    private val tag: String = "BrowserRepo"
 
     override val browserHistoryFlow: Flow<BrowserHistory>
         get() = browserHistoryStore.data
             .catch { exception ->
                 if (exception is IOException) {
-                    Log.e(TAG, "Error reading sort order preferences.", exception)
+                    Log.e(tag, "Error reading sort order preferences.", exception)
                     emit(BrowserHistory())
                 } else {
                     throw exception
@@ -35,7 +41,7 @@ class BrowserRepositoryImpl(
     }
 
     override suspend fun findSummarizedUrl(id: String): SummarizedUrl? =
-        create().get(HttpRoutes.SummarizedUrl(id = id).url) {
+        create().get(HttpRoutes.SharedSummarizedUrl(id = id).url) {
             contentType(ContentType.Application.Json)
         }
 }
