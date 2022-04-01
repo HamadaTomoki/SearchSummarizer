@@ -61,41 +61,37 @@ configurations {
 
 dependencies {
 
-    implementation 'androidx.core:core-ktx:1.7.0'
-    implementation 'androidx.appcompat:appcompat:1.4.1'
-    implementation 'com.google.android.material:material:1.5.0'
+    implementation "androidx.core:core-ktx:$ktx_core_version"
+    implementation "androidx.appcompat:appcompat:$appcompat_versionn"
+    implementation "com.google.android.material:material:$material_version"
     implementation "androidx.compose.ui:ui:$compose_version"
     implementation "androidx.compose.material:material:$compose_version"
     implementation "androidx.compose.ui:ui-tooling-preview:$compose_version"
-    implementation 'androidx.lifecycle:lifecycle-runtime-ktx:2.5.0-alpha04'
-    implementation "androidx.activity:activity-compose:$activityComposeVersion"
+    implementation "androidx.lifecycle:lifecycle-runtime-ktx:$lifecycle_runtime_ktx_version"
+    implementation "androidx.activity:activity-compose:$activity_compose_version"
 
     // Added dependencies
-    ktlint 'com.pinterest:ktlint:0.44.0'
-    implementation "com.google.accompanist:accompanist-systemuicontroller:0.17.0"
-    implementation "com.google.accompanist:accompanist-insets:0.20.2"
-    implementation "io.coil-kt:coil-compose:1.4.0"
-
-    var koin_version = "3.1.5"
+    ktlint "com.pinterest:ktlint:$ktlint_version"
+    implementation "com.google.accompanist:accompanist-systemuicontroller:$accompanist_systemuicontroller_version"
+    implementation "com.google.accompanist:accompanist-insets:$accompanist_insets"
+    implementation "io.coil-kt:coil-compose:$coil_compose_version"
     implementation "io.insert-koin:koin-android:$koin_version"
     implementation "io.insert-koin:koin-androidx-navigation:$koin_version"
     implementation "io.insert-koin:koin-androidx-compose:$koin_version"
-    implementation 'androidx.webkit:webkit:1.4.0'
-    implementation 'androidx.navigation:navigation-compose:2.5.0-alpha03'
+    implementation "androidx.webkit:webkit:$webkit_version"
+    implementation "androidx.navigation:navigation-compose:$navigation_compose_version"
     implementation "androidx.compose.material:material-icons-extended:$compose_version"
-    implementation "androidx.datastore:datastore:1.0.0"
-    implementation 'org.jetbrains.kotlinx:kotlinx-serialization-json:1.3.2'
-
-    def ktor_client_version = "1.6.7"
+    implementation "androidx.datastore:datastore:$datastore_version"
+    implementation "org.jetbrains.kotlinx:kotlinx-serialization-json:$kotlinx_serialization_json_version"
     implementation "io.ktor:ktor-client-core:$ktor_client_version"
     implementation "io.ktor:ktor-client-android:$ktor_client_version"
     implementation "io.ktor:ktor-client-serialization:$ktor_client_version"
     implementation "io.ktor:ktor-client-logging:$ktor_client_version"
     implementation "io.ktor:ktor-client-logging-jvm:$ktor_client_version"
 
-    testImplementation 'junit:junit:4.13.2'
-    androidTestImplementation 'androidx.test.ext:junit:1.1.3'
-    androidTestImplementation 'androidx.test.espresso:espresso-core:3.4.0'
+    testImplementation "junit:junit:$junit_version"
+    androidTestImplementation "androidx.test.ext:junit:$junit_ext_android_version"
+    androidTestImplementation "androidx.test.espresso:espresso-core:$espresso_core_version"
     androidTestImplementation "androidx.compose.ui:ui-test-junit4:$compose_version"
     debugImplementation "androidx.compose.ui:ui-tooling:$compose_version"
 }
@@ -112,7 +108,7 @@ tasks.dokkaHtml.configure {
 task ktlint(type: JavaExec, group: "verification") {
     description = "Check Kotlin code style."
     classpath = configurations.ktlint
-    main = "com.pinterest.ktlint.Main"
+    mainClass.set("com.pinterest.ktlint.Main")
     args "src/**/*.kt", "android", "--reporter=plain", "--reporter=checkstyle,output=${buildDir}/reports/ktlint/ktlint-result.xml"
 }
 check.dependsOn ktlint
@@ -120,7 +116,7 @@ check.dependsOn ktlint
 task ktlintFormat(type: JavaExec, group: "formatting") {
     description = "Fix Kotlin code style deviations."
     classpath = configurations.ktlint
-    main = "com.pinterest.ktlint.Main"
+    mainClass.set("com.pinterest.ktlint.Main")
     args "-F", "src/**/*.kt", "android", "--reporter=plain", "--reporter=checkstyle,output=${buildDir}/reports/ktlint/ktlint-result.xml"
     ignoreExitValue true
 }
